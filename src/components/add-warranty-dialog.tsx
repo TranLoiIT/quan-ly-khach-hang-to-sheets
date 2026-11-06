@@ -276,21 +276,21 @@ export function AddWarrantyDialog({
         aria-modal="true"
         aria-labelledby="add-warranty-title"
         aria-describedby="add-warranty-description"
-        className="animate-pop-in flex max-h-[94dvh] w-full max-w-3xl flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:max-h-[92dvh] sm:rounded-2xl"
+        className="animate-pop-in flex max-h-[96dvh] w-full max-w-3xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-h-[92dvh] sm:rounded-2xl"
       >
-        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-slate-100 px-5 py-5 sm:px-6">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5">
           <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
+            <span className="grid h-9 w-9 sm:h-10 sm:w-10 shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
               <BadgeCheck className="h-5 w-5" />
             </span>
             <div>
               <h2
                 id="add-warranty-title"
-                className="text-base font-semibold tracking-tight text-slate-900"
+                className="text-sm sm:text-base font-semibold tracking-tight text-slate-900"
               >
                 Tạo hóa đơn bán hàng
               </h2>
-              <p id="add-warranty-description" className="mt-0.5 text-xs text-slate-500">
+              <p id="add-warranty-description" className="mt-0.5 text-[11px] sm:text-xs text-slate-500">
                 Mỗi sản phẩm sẽ được ghi thành một dòng trong Google Sheet.
                 Mã hóa đơn được tạo tự động sau khi lưu.
               </p>
@@ -313,7 +313,7 @@ export function AddWarrantyDialog({
           aria-busy={isSaving}
           className="flex min-h-0 flex-1 flex-col"
         >
-          <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6">
+          <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5">
             <fieldset
               disabled={isSaving}
               className="m-0 min-w-0 space-y-6 border-0 p-0"
@@ -593,26 +593,24 @@ export function AddWarrantyDialog({
             </fieldset>
           </div>
 
-          <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-slate-100 bg-slate-50/80 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-            <p className="text-[10px] leading-4 text-slate-400">
+          <div className="flex shrink-0 flex-col-reverse gap-2.5 border-t border-slate-100 bg-slate-50/80 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
+            <p className="text-[10px] sm:text-xs leading-4 text-slate-400">
               <span className="font-semibold text-slate-500">Lưu ý:</span> dấu{" "}
-              <span className="text-red-500">*</span> là trường bắt buộc. Hóa đơn chỉ được gửi khi tất cả
-              <br />
-              thông tin bắt buộc đã hợp lệ.
+              <span className="text-red-500">*</span> là bắt buộc.
             </p>
             <div className="flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={handleClose}
                 disabled={isSaving}
-                className="inline-flex h-10 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex-1 sm:flex-initial inline-flex h-10 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Huỷ
               </button>
               <button
                 type="submit"
                 disabled={isSaving}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white shadow-sm shadow-emerald-600/20 transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
+                className="flex-1 sm:flex-initial inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white shadow-sm shadow-emerald-600/20 transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {isSaving ? (
                   <>
@@ -622,7 +620,7 @@ export function AddWarrantyDialog({
                 ) : (
                   <>
                     <BadgeCheck className="h-4 w-4" />
-                    Lưu hóa đơn ({values.products.length} sản phẩm)
+                    Lưu hóa đơn ({values.products.length})
                   </>
                 )}
               </button>

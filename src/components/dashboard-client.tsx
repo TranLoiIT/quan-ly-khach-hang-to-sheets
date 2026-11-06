@@ -354,8 +354,8 @@ export function DashboardClient({ user }: { user: SessionUser }) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-3 py-6 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <main className="mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
+        <div className="flex flex-col gap-3.5 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-700">
               <span className="grid h-5 w-5 place-items-center rounded-md bg-emerald-100">
@@ -363,10 +363,10 @@ export function DashboardClient({ user }: { user: SessionUser }) {
               </span>
               Dữ liệu bán hàng
             </div>
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+            <h1 className="mt-1.5 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl lg:text-3xl">
               Hóa đơn bán hàng
             </h1>
-            <p className="mt-1.5 max-w-2xl text-sm text-slate-500">
+            <p className="mt-1 max-w-2xl text-xs sm:text-sm text-slate-500">
               Tạo hóa đơn bán hàng cho một hoặc nhiều sản phẩm và tra cứu
               nhanh theo mã hóa đơn, đại lý, khách mua hàng hoặc serial.
             </p>
@@ -375,14 +375,14 @@ export function DashboardClient({ user }: { user: SessionUser }) {
           <button
             type="button"
             onClick={() => setIsAddOpen(true)}
-            className={primaryButton}
+            className={cn(primaryButton, "w-full justify-center sm:w-auto")}
           >
             <Plus className="h-4 w-4" />
             Tạo hóa đơn
           </button>
         </div>
 
-        <section className="mt-6 grid gap-3 sm:grid-cols-3">
+        <section className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {stats.map((stat) => {
             const Icon = stat.icon;
             return (
@@ -416,8 +416,8 @@ export function DashboardClient({ user }: { user: SessionUser }) {
           })}
         </section>
 
-        <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <section className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="flex flex-col gap-2.5 border-b border-slate-100 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
             <div className="relative w-full sm:max-w-md">
               <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
@@ -444,7 +444,7 @@ export function DashboardClient({ user }: { user: SessionUser }) {
               type="button"
               onClick={retry}
               disabled={isLoading}
-              className={secondaryButton}
+              className={cn(secondaryButton, "w-full justify-center sm:w-auto")}
             >
               <RefreshCw
                 className={cn("h-4 w-4", isLoading && "animate-spin")}
@@ -769,8 +769,8 @@ export function DashboardClient({ user }: { user: SessionUser }) {
           </div>
 
           {meta && rows.length > 0 && (
-            <div className="flex flex-col gap-3 border-t border-slate-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-[11px] text-slate-500">
+            <div className="flex flex-col gap-3 border-t border-slate-100 px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+              <p className="text-center text-xs text-slate-500 sm:text-left">
                 Hiển thị{" "}
                 <span className="font-semibold text-slate-700">
                   {rangeStart}–{rangeEnd}
@@ -782,19 +782,19 @@ export function DashboardClient({ user }: { user: SessionUser }) {
                 dòng sản phẩm
               </p>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center gap-2">
                 <button
                   type="button"
                   onClick={() => setPage(Math.max(1, meta.page - 1))}
                   disabled={meta.page <= 1 || isLoading}
                   aria-label="Trang trước"
-                  className={cn(secondaryButton, "h-8 px-2.5")}
+                  className={cn(secondaryButton, "h-8.5 px-3")}
                 >
-                  <ChevronLeft className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Trước</span>
+                  <ChevronLeft className="h-4 w-4" />
+                  <span>Trước</span>
                 </button>
 
-                <span className="min-w-[74px] text-center text-[11px] font-medium tabular-nums text-slate-500">
+                <span className="min-w-[80px] text-center text-xs font-semibold tabular-nums text-slate-600">
                   Trang {meta.page} / {meta.totalPages}
                 </span>
 
@@ -805,10 +805,10 @@ export function DashboardClient({ user }: { user: SessionUser }) {
                   }
                   disabled={meta.page >= meta.totalPages || isLoading}
                   aria-label="Trang sau"
-                  className={cn(secondaryButton, "h-8 px-2.5")}
+                  className={cn(secondaryButton, "h-8.5 px-3")}
                 >
-                  <span className="hidden sm:inline">Sau</span>
-                  <ChevronRight className="h-3.5 w-3.5" />
+                  <span>Sau</span>
+                  <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
             </div>

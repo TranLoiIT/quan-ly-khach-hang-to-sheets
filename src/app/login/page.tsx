@@ -26,12 +26,12 @@ export default async function LoginPage({
   const nextPath = safeNext(params.next);
 
   return (
-    <main className="relative min-h-dvh overflow-hidden bg-slate-950 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <main className="relative min-h-dvh overflow-x-hidden overflow-y-auto bg-slate-950 px-3 py-4 sm:px-6 sm:py-8 lg:px-8">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_8%,rgba(16,185,129,0.2),transparent_34%),radial-gradient(circle_at_88%_92%,rgba(20,184,166,0.12),transparent_36%)]" />
       <div className="bg-grid-emerald pointer-events-none absolute inset-0 opacity-50" />
 
-      <div className="relative mx-auto flex min-h-[calc(100dvh-3rem)] max-w-5xl items-center justify-center sm:min-h-[calc(100dvh-4rem)]">
-        <div className="grid w-full overflow-hidden rounded-[26px] border border-white/10 bg-white shadow-2xl shadow-black/40 lg:grid-cols-[1.02fr_0.98fr]">
+      <div className="relative mx-auto flex min-h-[calc(100dvh-2rem)] max-w-5xl items-center justify-center sm:min-h-[calc(100dvh-4rem)]">
+        <div className="grid w-full overflow-hidden rounded-2xl sm:rounded-[26px] border border-white/10 bg-white shadow-2xl shadow-black/40 lg:grid-cols-[1.02fr_0.98fr]">
           <aside className="relative hidden flex-col justify-between overflow-hidden bg-[#042f26] p-10 lg:flex xl:p-12">
             <div className="bg-grid-emerald pointer-events-none absolute inset-0 opacity-60" />
             <div className="pointer-events-none absolute -left-24 top-10 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl" />
@@ -146,7 +146,7 @@ export default async function LoginPage({
             </div> */}
           </aside>
 
-          <section className="relative flex flex-col justify-center bg-white p-7 sm:p-10 lg:p-12">
+          <section className="relative flex flex-col justify-center bg-white p-5 sm:p-10 lg:p-12">
             <div className="mx-auto w-full max-w-[380px]">
               <div className="lg:hidden">
                 <Brand subtitle="Quản lý bán hàng FOTAMI" />
