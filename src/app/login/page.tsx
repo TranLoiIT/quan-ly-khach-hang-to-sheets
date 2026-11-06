@@ -3,7 +3,9 @@ import { Brand } from "@/components/brand";
 import { LoginForm } from "@/components/login-form";
 
 export const metadata: Metadata = {
-  title: "Đăng nhập",
+  title: "Đăng nhập hệ thống",
+  description:
+    "Đăng nhập cổng quản trị FOTAMI Care để quản lý bán hàng, tạo và tra cứu hóa đơn khách hàng.",
 };
 
 function safeNext(value: string | string[] | undefined): string {

@@ -3,17 +3,71 @@ import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "https://fotamicare.vn"
+  ),
   applicationName: "FOTAMI Care",
   title: {
-    default: "FOTAMI Care – Hóa đơn bán hàng",
+    default: "FOTAMI Care – Hệ Thống Quản Lý Bán Hàng & Hóa Đơn Bảo Hành",
     template: "%s | FOTAMI Care",
   },
   description:
-    "Bảng điều khiển nội bộ để tạo, xem và xoá hóa đơn bán hàng FOTAMI trên Google Sheets.",
+    "Phần mềm quản lý bán hàng và theo dõi hóa đơn, kích hoạt bảo hành điện tử chính hãng FOTAMI đồng bộ tự động trực tiếp với Google Sheets.",
+  keywords: [
+    "FOTAMI",
+    "FOTAMI Care",
+    "quản lý bán hàng",
+    "quản lý khách hàng",
+    "hóa đơn bán hàng",
+    "bảo hành điện tử",
+    "tra cứu serial",
+    "google sheets",
+  ],
+  authors: [{ name: "FOTAMI Care" }],
+  creator: "FOTAMI",
+  publisher: "FOTAMI",
   robots: {
-    index: false,
-    follow: false,
-    nocache: true,
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+  },
+  openGraph: {
+    type: "website",
+    locale: "vi_VN",
+    url: "/",
+    siteName: "FOTAMI Care",
+    title: "FOTAMI Care – Hệ Thống Quản Lý Bán Hàng & Hóa Đơn",
+    description:
+      "Nền tảng quản lý bán hàng, tạo và tra cứu hóa đơn, theo dõi serial và bảo hành FOTAMI tiện lợi trên Google Sheets.",
+    images: [
+      {
+        url: "/icon.svg",
+        width: 512,
+        height: 512,
+        alt: "FOTAMI Care Logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "FOTAMI Care – Quản Lý Bán Hàng & Hóa Đơn",
+    description:
+      "Quản lý hóa đơn bán hàng và dữ liệu khách hàng FOTAMI tiện lợi, đồng bộ trực tiếp Google Sheets.",
+    images: ["/icon.svg"],
   },
   formatDetection: {
     email: false,
