@@ -40,19 +40,19 @@ export default async function LoginPage({
             <div className="relative">
               <Brand
                 tone="onDark"
-                subtitle="FOTAMI warranty workspace"
+                subtitle="Không gian bán hàng FOTAMI"
               />
 
               <div className="mt-12 inline-flex items-center gap-2 rounded-full border border-emerald-300/15 bg-emerald-300/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-100/80">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
-                Warranty console
+                Quản lý bán hàng
               </div>
 
               <h1 className="mt-5 max-w-sm text-[2.15rem] font-bold leading-[1.15] tracking-tight text-white">
-                Phiếu bảo hành FOTAMI, gọn trong một màn hình.
+                Hóa đơn bán hàng, gọn trong một màn hình.
               </h1>
               <p className="mt-4 max-w-sm text-sm leading-6 text-emerald-100/60">
-                Tạo phiếu với một hoặc nhiều sản phẩm, tra cứu serial và xoá
+                Tạo hóa đơn với một hoặc nhiều sản phẩm, tra cứu serial và xoá
                 dòng trực tiếp trên Google Sheets — không cần mở spreadsheet.
               </p>
 
@@ -63,7 +63,7 @@ export default async function LoginPage({
                   </span>
                   <div>
                     <p className="text-sm font-medium text-emerald-50">
-                      Một phiếu, nhiều sản phẩm
+                      Một hóa đơn, nhiều sản phẩm
                     </p>
                     <p className="text-[11px] text-emerald-100/45">
                       Mặc định 1 dòng, thêm sản phẩm khi cần
@@ -79,7 +79,7 @@ export default async function LoginPage({
                       Kiểm tra đầy đủ trước khi lưu
                     </p>
                     <p className="text-[11px] text-emerald-100/45">
-                      Bắt buộc thông tin đại lý, khách hàng, sản phẩm
+                      Bắt buộc thông tin đại lý, khách mua hàng, sản phẩm
                     </p>
                   </div>
                 </li>
@@ -104,7 +104,7 @@ export default async function LoginPage({
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-100/55">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                    Phiếu bảo hành gần đây
+                    Hóa đơn gần đây
                   </div>
                   <span className="rounded-md bg-white/5 px-2 py-1 text-[10px] font-medium text-emerald-100/45">
                     Sheet1
@@ -149,7 +149,7 @@ export default async function LoginPage({
           <section className="relative flex flex-col justify-center bg-white p-7 sm:p-10 lg:p-12">
             <div className="mx-auto w-full max-w-[380px]">
               <div className="lg:hidden">
-                <Brand subtitle="FOTAMI warranty console" />
+                <Brand subtitle="Quản lý bán hàng FOTAMI" />
               </div>
 
               <div className="mt-8 lg:mt-0">
@@ -161,7 +161,7 @@ export default async function LoginPage({
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-500">
                   Sử dụng tài khoản nội bộ được quản trị viên cấp để truy cập
-                  phiếu bảo hành.
+                  hóa đơn bán hàng.
                 </p>
               </div>
 

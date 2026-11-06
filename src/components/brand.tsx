@@ -38,7 +38,7 @@ export function Brand({
       <div className="min-w-0">
         <p
           className={cn(
-            "text-[15px] font-bold tracking-tight",
+            "font-display text-[15px] font-bold tracking-tight",
             tone === "onDark" ? "text-white" : "text-slate-900",
           )}
         >
@@ -50,7 +50,7 @@ export function Brand({
             tone === "onDark" ? "text-emerald-100/60" : "text-slate-400",
           )}
         >
-          {subtitle ?? "Warranty console"}
+          {subtitle ?? "Quản lý bán hàng"}
         </p>
       </div>
     </div>

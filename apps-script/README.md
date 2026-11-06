@@ -37,10 +37,17 @@ Tab mặc định là `Sheet1` (có thể đổi bằng Script Property `SHEET_T
 | K | `Thời hạn bảo hành (tháng)` | `warrantyMonths` | Số nguyên 1–120 |
 | L | `Tên sản phẩm` | `productName` | |
 | M | `Model` | `model` | |
-| N | `Serial (S/N)` | `serial` | Lưu dạng chuỗi để giữ số 0 đầu |
+| N | `Serial (S/N)` | `serial` | Không bắt buộc; lưu dạng chuỗi để giữ số 0 đầu |
 | O | `Ngày bán` | `saleDate` | Định dạng `yyyy-mm-dd` |
 
 **Mỗi dòng là một sản phẩm.** Một phiếu có 3 sản phẩm sẽ có 3 dòng, cùng `Mã phiếu` và cùng `Thời gian tạo`. API `list` trả về từng dòng sản phẩm; trường `registrations` đếm số phiếu khác nhau. Xoá một `rowId` chỉ xoá đúng một dòng sản phẩm, không xoá các sản phẩm còn lại của cùng phiếu.
+
+### Validate và giá trị thiếu
+
+- Apps Script **không validate dữ liệu** (`list`/`append`/`delete` chỉ kiểm tra token, JSON và cấu trúc sheet).
+- FE chịu trách nhiệm validate toàn bộ field trước khi gửi.
+- Khi `append`, field nào bị thiếu, `null` hoặc chuỗi rỗng sẽ được ghi thành `"-"`.
+- Nếu `products` không được gửi hoặc là mảng rỗng, Apps Script vẫn tạo 1 dòng hóa đơn với các field sản phẩm là `"-"`.
 
 ### Xem và sửa Sheet trực tiếp
 

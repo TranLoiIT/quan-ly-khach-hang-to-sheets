@@ -79,12 +79,20 @@ export const PRODUCT_FIELDS = [
   },
 ] as const;
 
+export function getTodayDateString(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export function emptyProductValues(): ProductFormValues {
   return {
     productName: "",
     model: "",
     serial: "",
-    saleDate: "",
+    saleDate: getTodayDateString(),
   };
 }
 
@@ -96,7 +104,7 @@ export function emptyWarrantyFormValues(): WarrantyFormValues {
     customerName: "",
     customerPhone: "",
     customerAddress: "",
-    deliveryDate: "",
+    deliveryDate: getTodayDateString(),
     warrantyMonths: "12",
     products: [emptyProductValues()],
   };

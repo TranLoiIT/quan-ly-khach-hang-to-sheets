@@ -4,18 +4,26 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
+  Building2,
+  CalendarDays,
+  Check,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Copy,
   FileSpreadsheet,
+  FileText,
   Loader2,
   LogOut,
+  MapPin,
   Package,
+  Phone,
   Plus,
   RefreshCw,
   Search,
   ShieldCheck,
   Trash2,
+  User,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -68,6 +76,17 @@ export function DashboardClient({ user }: { user: SessionUser }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
+  const [copiedSerial, setCopiedSerial] = useState<string | null>(null);
+
+  function copyToClipboard(text: string, label: string) {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopiedSerial(text);
+    showToast("success", `Đã sao chép ${label}: ${text}`);
+    setTimeout(() => {
+      setCopiedSerial((curr) => (curr === text ? null : curr));
+    }, 2000);
+  }
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -118,7 +137,7 @@ export function DashboardClient({ user }: { user: SessionUser }) {
 
         if (!response.ok || !data || !Array.isArray(data.rows)) {
           throw new Error(
-            data?.error ?? "Không thể tải dữ liệu bảo hành từ Google Sheets.",
+            data?.error ?? "Không thể tải dữ liệu hóa đơn từ Google Sheets.",
           );
         }
 
@@ -178,7 +197,7 @@ export function DashboardClient({ user }: { user: SessionUser }) {
     setIsAddOpen(false);
     showToast(
       "success",
-      `Đã tạo phiếu ${summary.registrationCode} với ${summary.count} sản phẩm.`,
+      `Đã tạo hóa đơn ${summary.registrationCode} với ${summary.count} sản phẩm.`,
     );
     setQuery("");
     setDebouncedQuery("");
@@ -217,7 +236,7 @@ export function DashboardClient({ user }: { user: SessionUser }) {
       const productLabel =
         target.productName || target.serial || "đã chọn";
       const ticketLabel = target.registrationCode
-        ? ` khỏi phiếu ${target.registrationCode}`
+        ? ` khỏi hóa đơn ${target.registrationCode}`
         : "";
       setDeleteTarget(null);
       showToast(
@@ -267,38 +286,38 @@ export function DashboardClient({ user }: { user: SessionUser }) {
     icon: LucideIcon;
     iconClass: string;
   }> = [
-    {
-      label: "Tổng sản phẩm",
-      value: meta ? meta.total.toLocaleString("vi-VN") : "—",
-      hint: "Tất cả dòng sản phẩm trong Google Sheet",
-      icon: Package,
-      iconClass: "bg-emerald-50 text-emerald-600 ring-emerald-100",
-    },
-    {
-      label: "Tổng phiếu",
-      value: meta ? meta.registrations.toLocaleString("vi-VN") : "—",
-      hint: "Mỗi mã phiếu có thể gồm nhiều sản phẩm",
-      icon: FileSpreadsheet,
-      iconClass: "bg-sky-50 text-sky-600 ring-sky-100",
-    },
-    {
-      label: "Kết quả lọc",
-      value: meta ? meta.filtered.toLocaleString("vi-VN") : "—",
-      hint: debouncedQuery
-        ? meta
-          ? `${meta.filteredRegistrations.toLocaleString("vi-VN")} phiếu khớp từ khoá`
-          : "Đang lọc dữ liệu"
-        : "Chưa áp dụng bộ lọc",
-      icon: Search,
-      iconClass: "bg-violet-50 text-violet-600 ring-violet-100",
-    },
-  ];
+      {
+        label: "Tổng sản phẩm",
+        value: meta ? meta.total.toLocaleString("vi-VN") : "—",
+        hint: "Tất cả dòng sản phẩm trong Google Sheet",
+        icon: Package,
+        iconClass: "bg-emerald-50 text-emerald-600 ring-emerald-100",
+      },
+      {
+        label: "Tổng hóa đơn",
+        value: meta ? meta.registrations.toLocaleString("vi-VN") : "—",
+        hint: "Mỗi mã hóa đơn có thể gồm nhiều sản phẩm",
+        icon: FileSpreadsheet,
+        iconClass: "bg-sky-50 text-sky-600 ring-sky-100",
+      },
+      {
+        label: "Kết quả lọc",
+        value: meta ? meta.filtered.toLocaleString("vi-VN") : "—",
+        hint: debouncedQuery
+          ? meta
+            ? `${meta.filteredRegistrations.toLocaleString("vi-VN")} hóa đơn khớp từ khoá`
+            : "Đang lọc dữ liệu"
+          : "Chưa áp dụng bộ lọc",
+        icon: Search,
+        iconClass: "bg-violet-50 text-violet-600 ring-violet-100",
+      },
+    ];
 
   return (
     <div className="min-h-dvh bg-slate-50">
       <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/85 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          <Brand subtitle="Warranty console" />
+          <Brand subtitle="Quản lý bán hàng" />
 
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="hidden items-center gap-2.5 rounded-full border border-slate-200 bg-white py-1.5 pl-1.5 pr-3 sm:flex">
@@ -335,21 +354,21 @@ export function DashboardClient({ user }: { user: SessionUser }) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-7xl px-3 py-6 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-700">
               <span className="grid h-5 w-5 place-items-center rounded-md bg-emerald-100">
                 <ShieldCheck className="h-3 w-3" />
               </span>
-              Dữ liệu bảo hành
+              Dữ liệu bán hàng
             </div>
             <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-              Phiếu bảo hành FOTAMI
+              Hóa đơn bán hàng
             </h1>
             <p className="mt-1.5 max-w-2xl text-sm text-slate-500">
-              Tạo phiếu đăng ký bảo hành cho một hoặc nhiều sản phẩm và tra cứu
-              nhanh theo mã phiếu, đại lý, khách hàng hoặc serial.
+              Tạo hóa đơn bán hàng cho một hoặc nhiều sản phẩm và tra cứu
+              nhanh theo mã hóa đơn, đại lý, khách mua hàng hoặc serial.
             </p>
           </div>
 
@@ -359,7 +378,7 @@ export function DashboardClient({ user }: { user: SessionUser }) {
             className={primaryButton}
           >
             <Plus className="h-4 w-4" />
-            Tạo phiếu
+            Tạo hóa đơn
           </button>
         </div>
 
@@ -405,8 +424,8 @@ export function DashboardClient({ user }: { user: SessionUser }) {
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Tìm mã phiếu, đại lý, khách hàng, serial..."
-                aria-label="Tìm kiếm phiếu bảo hành"
+                placeholder="Tìm mã hóa đơn, đại lý, khách mua hàng, serial..."
+                aria-label="Tìm kiếm hóa đơn bán hàng"
                 className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-9 text-xs text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 [&::-webkit-search-cancel-button]:hidden"
               />
               {query && (
@@ -454,37 +473,37 @@ export function DashboardClient({ user }: { user: SessionUser }) {
               isLoading && rows.length > 0 && "opacity-60",
             )}
           >
-            <table className="w-full min-w-[1240px] text-left text-sm">
+            <table className="w-full text-left text-sm">
               <caption className="sr-only">
-                Danh sách sản phẩm bảo hành trong Google Sheet
+                Danh sách sản phẩm trong hóa đơn bán hàng
               </caption>
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/80">
-                  <th className="w-12 px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                    STT
+                <tr className="border-b border-slate-200 bg-slate-50/90">
+                  <th className="w-12 px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider text-slate-500">
+                    #
                   </th>
-                  <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                    Mã phiếu
+                  <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Mã hóa đơn
                   </th>
-                  <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
                     Đại lý
                   </th>
-                  <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                    Khách hàng
+                  <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Khách mua hàng
                   </th>
-                  <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                    Sản phẩm
+                  <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Sản phẩm & Model
                   </th>
-                  <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                    Serial
+                  <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Serial (S/N)
                   </th>
-                  <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
                     Bảo hành
                   </th>
-                  <th className="hidden px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400 xl:table-cell">
+                  <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
                     Ngày bán
                   </th>
-                  <th className="w-14 px-4 py-3">
+                  <th className="w-14 px-4 py-3.5 text-right">
                     <span className="sr-only">Thao tác</span>
                   </th>
                 </tr>
@@ -499,10 +518,10 @@ export function DashboardClient({ user }: { user: SessionUser }) {
                         <span className="grid h-14 w-14 place-items-center rounded-2xl bg-amber-50 text-amber-600 ring-1 ring-amber-100">
                           <AlertCircle className="h-6 w-6" />
                         </span>
-                        <h3 className="mt-4 text-sm font-semibold text-slate-800">
+                        <h3 className="mt-4 text-base font-semibold text-slate-800">
                           Không tải được dữ liệu
                         </h3>
-                        <p className="mt-1 max-w-md text-xs leading-5 text-slate-500">
+                        <p className="mt-1 max-w-md text-sm leading-5 text-slate-500">
                           {error}
                         </p>
                         <button
@@ -527,15 +546,15 @@ export function DashboardClient({ user }: { user: SessionUser }) {
                             <FileSpreadsheet className="h-6 w-6" />
                           )}
                         </span>
-                        <h3 className="mt-4 text-sm font-semibold text-slate-800">
+                        <h3 className="mt-4 text-base font-semibold text-slate-800">
                           {debouncedQuery
-                            ? "Không tìm thấy phiếu/sản phẩm"
-                            : "Chưa có phiếu bảo hành"}
+                            ? "Không tìm thấy hóa đơn/sản phẩm"
+                            : "Chưa có hóa đơn"}
                         </h3>
-                        <p className="mt-1 max-w-sm text-xs leading-5 text-slate-500">
+                        <p className="mt-1 max-w-sm text-sm leading-5 text-slate-500">
                           {debouncedQuery
                             ? `Không có dòng sản phẩm nào khớp với "${debouncedQuery}". Thử từ khoá khác hoặc xoá bộ lọc.`
-                            : "Phiếu bảo hành đầu tiên sẽ được ghi vào Google Sheet và hiển thị tại đây."}
+                            : "Hóa đơn đầu tiên sẽ được ghi vào Google Sheet và hiển thị tại đây."}
                         </p>
                         {debouncedQuery ? (
                           <button
@@ -553,7 +572,7 @@ export function DashboardClient({ user }: { user: SessionUser }) {
                             className={cn(primaryButton, "mt-4")}
                           >
                             <Plus className="h-4 w-4" />
-                            Tạo phiếu đầu tiên
+                            Tạo hóa đơn đầu tiên
                           </button>
                         )}
                       </div>
@@ -562,24 +581,43 @@ export function DashboardClient({ user }: { user: SessionUser }) {
                 ) : (
                   rows.map((row, index) => {
                     const canDelete = UUID_RE.test(row.rowId);
+                    const isSerialCopied = copiedSerial === row.serial;
                     return (
                       <tr
                         key={row.rowId}
-                        className="transition-colors hover:bg-slate-50/70"
+                        className="group transition-colors hover:bg-slate-50/80"
                       >
-                        <td className="px-4 py-3.5 text-xs tabular-nums text-slate-400">
+                        <td className="px-4 py-4 text-center text-xs font-semibold tabular-nums text-slate-400">
                           {rangeStart + index}
                         </td>
-                        <td className="px-4 py-3.5">
-                          <p className="whitespace-nowrap font-mono text-xs font-semibold text-slate-800">
-                            {row.registrationCode || "—"}
-                          </p>
-                          <p className="mt-0.5 whitespace-nowrap text-[10px] text-slate-400">
+
+                        {/* Mã hóa đơn */}
+                        <td className="px-4 py-4">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-sm font-bold text-slate-900">
+                              {row.registrationCode || "—"}
+                            </span>
+                            {row.registrationCode && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  copyToClipboard(row.registrationCode, "mã hóa đơn")
+                                }
+                                title="Sao chép mã hóa đơn"
+                                className="rounded-md p-1 text-slate-400 opacity-60 transition group-hover:opacity-100 hover:bg-slate-100 hover:text-slate-700 focus:opacity-100"
+                              >
+                                <Copy className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+                          </div>
+                          <p className="mt-1 text-xs text-slate-500">
                             {formatDateTime(row.createdAt)}
                           </p>
                         </td>
+
+                        {/* Đại lý */}
                         <td
-                          className="px-4 py-3.5"
+                          className="px-4 py-4"
                           title={
                             [
                               row.dealerName,
@@ -590,76 +628,136 @@ export function DashboardClient({ user }: { user: SessionUser }) {
                               .join(" · ") || undefined
                           }
                         >
-                          <p className="max-w-[200px] truncate text-xs font-semibold text-slate-800">
-                            {row.dealerName || "—"}
-                          </p>
-                          <p className="mt-0.5 max-w-[200px] truncate text-[10px] text-slate-400">
-                            {row.dealerCode || "—"}
-                            {row.dealerPhone && (
-                              <span className="hidden 2xl:inline">
-                                {" "}
-                                · {row.dealerPhone}
+                          <div className="flex items-center gap-2">
+                            <Building2 className="h-4 w-4 shrink-0 text-slate-500" />
+                            <span className="text-sm font-semibold text-slate-900">
+                              {row.dealerName || "—"}
+                            </span>
+                          </div>
+                          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-600">
+                            {row.dealerCode && (
+                              <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs font-medium text-slate-700">
+                                {row.dealerCode}
                               </span>
                             )}
-                          </p>
+                            {row.dealerPhone && (
+                              <span className="inline-flex items-center gap-1 font-medium text-slate-500">
+                                <Phone className="h-3 w-3" />
+                                0{row.dealerPhone}
+                              </span>
+                            )}
+                          </div>
                         </td>
+
+                        {/* Khách hàng */}
                         <td
-                          className="px-4 py-3.5"
+                          className="px-4 py-4"
                           title={row.customerAddress || undefined}
                         >
-                          <p className="max-w-[200px] truncate text-xs font-semibold text-slate-800">
-                            {row.customerName || "—"}
-                          </p>
-                          <p className="mt-0.5 max-w-[200px] truncate text-[10px] text-slate-400">
-                            {row.customerPhone || "—"}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 shrink-0 text-slate-500" />
+                            <span className="text-sm font-semibold text-slate-900">
+                              {row.customerName || "—"}
+                            </span>
+                          </div>
+                          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-600">
+                            {row.customerPhone && (
+                              <span className="inline-flex items-center gap-1 font-medium text-slate-500">
+                                <Phone className="h-3 w-3" />
+                                0{row.customerPhone}
+                              </span>
+                            )}
+                            {row.customerAddress && row.customerAddress !== "-" && (
+                              <span
+                                className="inline-flex max-w-[180px] items-center gap-1 truncate text-xs text-slate-500"
+                                title={row.customerAddress}
+                              >
+                                <MapPin className="h-3 w-3 shrink-0" />
+                                {row.customerAddress}
+                              </span>
+                            )}
+                          </div>
                         </td>
+
+                        {/* Sản phẩm & Model */}
                         <td
-                          className="px-4 py-3.5"
+                          className="px-4 py-4"
                           title={row.productName || undefined}
                         >
-                          <p className="max-w-[220px] truncate text-xs font-semibold text-slate-800">
-                            {row.productName || "—"}
-                          </p>
-                          <p className="mt-0.5 max-w-[220px] truncate text-[10px] text-slate-400">
-                            Model: {row.model || "—"}
+                          <div className="flex items-center gap-2">
+                            <Package className="h-4 w-4 shrink-0 text-emerald-600" />
+                            <span className="text-sm font-semibold text-slate-900">
+                              {row.productName || "—"}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-xs text-slate-500">
+                            Model:{" "}
+                            <span className="font-medium text-slate-700">
+                              {row.model || "—"}
+                            </span>
                           </p>
                         </td>
-                        <td className="px-4 py-3.5">
-                          <span
-                            className="block max-w-[180px] truncate font-mono text-[11px] font-medium text-slate-700"
-                            title={row.serial || undefined}
-                          >
-                            {row.serial || "—"}
-                          </span>
+
+                        {/* Serial */}
+                        <td className="px-4 py-4">
+                          {row.serial && row.serial !== "-" ? (
+                            <div className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 font-mono text-xs font-semibold text-slate-800 shadow-2xs">
+                              <span>{row.serial}</span>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  copyToClipboard(row.serial, "mã serial")
+                                }
+                                title="Sao chép Serial"
+                                className="rounded p-1 text-slate-400 transition hover:bg-slate-200 hover:text-emerald-700"
+                              >
+                                {isSerialCopied ? (
+                                  <Check className="h-3.5 w-3.5 text-emerald-600" />
+                                ) : (
+                                  <Copy className="h-3.5 w-3.5" />
+                                )}
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-slate-400">—</span>
+                          )}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3.5">
-                          <p className="text-xs font-semibold text-slate-700">
+
+                        {/* Bảo hành */}
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-600/20">
+                            <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
                             {formatWarrantyMonths(row.warrantyMonths)}
-                          </p>
-                          <p className="mt-0.5 text-[10px] text-slate-400">
+                          </span>
+                          <p className="mt-1 text-xs text-slate-500">
                             Giao: {formatDate(row.deliveryDate)}
                           </p>
                         </td>
-                        <td className="hidden whitespace-nowrap px-4 py-3.5 text-xs text-slate-500 xl:table-cell">
-                          {formatDate(row.saleDate)}
+
+                        {/* Ngày bán */}
+                        <td className="px-4 py-4 whitespace-nowrap text-xs text-slate-700">
+                          <div className="flex items-center gap-1.5 font-medium">
+                            <CalendarDays className="h-3.5 w-3.5 text-slate-400" />
+                            {formatDate(row.saleDate)}
+                          </div>
                         </td>
-                        <td className="px-4 py-3.5 text-right">
+
+                        {/* Thao tác */}
+                        <td className="px-4 py-4 text-right">
                           <button
                             type="button"
                             onClick={() => setDeleteTarget(row)}
                             disabled={!canDelete}
-                            aria-label={`Xoá sản phẩm ${
-                              row.productName || row.serial || "này"
-                            }`}
+                            aria-label={`Xoá sản phẩm ${row.productName || row.serial || "này"
+                              }`}
                             title={
                               canDelete
                                 ? "Xoá dòng sản phẩm này"
                                 : "Dòng sản phẩm thiếu ID nên không thể xoá an toàn"
                             }
-                            className="grid h-8 w-8 place-items-center rounded-lg text-slate-400 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:cursor-not-allowed disabled:opacity-30"
+                            className="grid h-8.5 w-8.5 place-items-center rounded-lg text-slate-400 opacity-60 transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-600 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:cursor-not-allowed disabled:opacity-20"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-4.5 w-4.5" />
                           </button>
                         </td>
                       </tr>
@@ -720,8 +818,8 @@ export function DashboardClient({ user }: { user: SessionUser }) {
         <footer className="mt-6 flex flex-col gap-2 text-[10px] text-slate-400 sm:flex-row sm:items-center sm:justify-between">
           <p className="flex items-center gap-1.5">
             <ShieldCheck className="h-3.5 w-3.5" />
-            Mỗi dòng là một sản phẩm; nhiều sản phẩm cùng phiếu dùng chung mã
-            phiếu.
+            Mỗi dòng là một sản phẩm; nhiều sản phẩm cùng hóa đơn dùng chung mã
+            hóa đơn.
           </p>
           <p>Phiên đăng nhập tự hết hạn sau 8 giờ.</p>
         </footer>

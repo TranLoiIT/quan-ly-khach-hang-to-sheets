@@ -12,18 +12,43 @@ function isValidDateString(value: string): boolean {
   );
 }
 
+function normalizeVietnamesePhone(value: string): string {
+  let phone = value.replace(/[\s.\-()]/g, "");
+
+  if (phone.startsWith("+84")) {
+    phone = phone.slice(3);
+  } else if (phone.startsWith("0084")) {
+    phone = phone.slice(4);
+  } else if (phone.startsWith("84") && phone.length >= 11) {
+    phone = phone.slice(2);
+  }
+
+  // Cho phép nhập thiếu số 0 đầu, ví dụ 901234567.
+  if (!phone.startsWith("0")) {
+    phone = `0${phone}`;
+  }
+
+  return phone;
+}
+
+function isValidVietnamesePhone(value: string): boolean {
+  const phone = normalizeVietnamesePhone(value);
+  // Di động: 03, 05, 07, 08, 09 + 8 số (10 số).
+  // Cố định: 02 + 8-9 số (10-11 số).
+  return /^0(3|5|7|8|9)\d{8}$/.test(phone) || /^02\d{8,9}$/.test(phone);
+}
+
 function phoneSchema(label: string) {
   return z
     .string()
     .trim()
     .min(1, `Vui lòng nhập ${label}.`)
-    .max(30, `${label} không được dài quá 30 ký tự.`)
-    .refine((value) => {
-      const digits = value.replace(/\D/g, "");
-      return (
-        /^[0-9+\s().-]+$/.test(value) && digits.length >= 8 && digits.length <= 15
-      );
-    }, `${label} không hợp lệ (cần 8-15 chữ số).`);
+    .max(10, `${label} không được dài quá 10 ký tự.`)
+    .transform(normalizeVietnamesePhone)
+    .refine(
+      isValidVietnamesePhone,
+      `${label} không đúng định dạng số điện thoại hợp lệ.`,
+    );
 }
 
 export const productInputSchema = z.object({
@@ -40,8 +65,9 @@ export const productInputSchema = z.object({
   serial: z
     .string()
     .trim()
-    .min(1, "Vui lòng nhập serial.")
-    .max(100, "Serial không được dài quá 100 ký tự."),
+    .max(100, "Serial không được dài quá 100 ký tự.")
+    .transform((val) => (val === "" ? "-" : val))
+    .default("-"),
   saleDate: z
     .string()
     .trim()
@@ -71,7 +97,8 @@ export const warrantyInputSchema = z.object({
     .string()
     .trim()
     .max(300, "Địa chỉ không được dài quá 300 ký tự.")
-    .default(""),
+    .transform((val) => (val === "" ? "-" : val))
+    .default("-"),
   deliveryDate: z
     .string()
     .trim()

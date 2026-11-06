@@ -84,13 +84,13 @@ export function DeleteRecordDialog({
 
             <dl className="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-slate-200 px-4 py-3 text-[11px]">
               <div className="min-w-0">
-                <dt className="font-medium text-slate-400">Mã phiếu</dt>
+                <dt className="font-medium text-slate-400">Mã hóa đơn</dt>
                 <dd className="mt-0.5 truncate font-mono font-semibold text-slate-700">
                   {record.registrationCode || "—"}
                 </dd>
               </div>
               <div className="min-w-0">
-                <dt className="font-medium text-slate-400">Khách hàng</dt>
+                <dt className="font-medium text-slate-400">Khách mua hàng</dt>
                 <dd className="mt-0.5 truncate font-medium text-slate-700">
                   {record.customerName || "—"}
                 </dd>
@@ -114,7 +114,7 @@ export function DeleteRecordDialog({
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
             <p>
               Chỉ dòng sản phẩm này bị xoá khỏi Google Sheet. Các sản phẩm khác
-              cùng mã phiếu vẫn được giữ lại.
+              cùng mã hóa đơn vẫn được giữ lại.
             </p>
           </div>
         </div>
