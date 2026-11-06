@@ -1,0 +1,35 @@
+{
+  "name": "sheetdesk",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Next.js dashboard for Google Sheets with JSON accounts and bcrypt-hashed passwords.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "users": "node scripts/users.mjs",
+    "secret": "node scripts/generate-secret.mjs"
+  },
+  "dependencies": {
+    "bcryptjs": "3.0.3",
+    "jose": "6.2.15",
+    "lucide-react": "1.69.0",
+    "next": "16.4.5",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "server-only": "0.0.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.4",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.5",
+    "tailwindcss": "4.3.4",
+    "typescript": "5.9.3"
+  }
+}

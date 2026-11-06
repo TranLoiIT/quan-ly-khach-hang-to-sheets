@@ -1,0 +1,11 @@
+{
+  "users": [
+    {
+      "username": "admin",
+      "name": "Quản trị viên",
+      "passwordHash": "$2b$12$o4qDlhmdVSK//kx3ZG6IuuYNYKUozbBQzl5HY7oAe0auNcsB7UOJ.",
+      "role": "admin",
+      "active": true
+    }
+  ]
+}
