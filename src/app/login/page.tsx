@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import { Info } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { LoginForm } from "@/components/login-form";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = {
   title: "Đăng nhập hệ thống",
@@ -28,12 +31,12 @@ export default async function LoginPage({
   const nextPath = safeNext(params.next);
 
   return (
-    <main className="relative min-h-dvh overflow-x-hidden overflow-y-auto bg-slate-950 px-3 py-4 sm:px-6 sm:py-8 lg:px-8">
+    <main className="relative min-h-screen min-h-dvh w-full overflow-x-hidden overflow-y-auto bg-slate-950 px-3 py-6 sm:px-6 sm:py-8 lg:px-8">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_8%,rgba(16,185,129,0.2),transparent_34%),radial-gradient(circle_at_88%_92%,rgba(20,184,166,0.12),transparent_36%)]" />
       <div className="bg-grid-emerald pointer-events-none absolute inset-0 opacity-50" />
 
-      <div className="relative mx-auto flex min-h-[calc(100dvh-2rem)] max-w-5xl items-center justify-center sm:min-h-[calc(100dvh-4rem)]">
-        <div className="grid w-full overflow-hidden rounded-2xl sm:rounded-[26px] border border-white/10 bg-white shadow-2xl shadow-black/40 lg:grid-cols-[1.02fr_0.98fr]">
+      <div className="relative mx-auto flex min-h-[calc(100vh-3rem)] min-h-[calc(100dvh-3rem)] max-w-5xl items-center justify-center py-2 sm:py-4">
+        <div className="my-auto grid w-full overflow-hidden rounded-2xl sm:rounded-[26px] border border-white/10 bg-white shadow-2xl shadow-black/40 lg:grid-cols-[1.02fr_0.98fr]">
           <aside className="relative hidden flex-col justify-between overflow-hidden bg-[#042f26] p-10 lg:flex xl:p-12">
             <div className="bg-grid-emerald pointer-events-none absolute inset-0 opacity-60" />
             <div className="pointer-events-none absolute -left-24 top-10 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl" />
@@ -45,10 +48,13 @@ export default async function LoginPage({
                 subtitle="Không gian bán hàng FOTAMI"
               />
 
-              <div className="mt-12 inline-flex items-center gap-2 rounded-full border border-emerald-300/15 bg-emerald-300/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-100/80">
+              <Badge
+                variant="outline"
+                className="mt-12 h-auto gap-2 rounded-full border-emerald-300/15 bg-emerald-300/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-100/80"
+              >
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
                 Quản lý bán hàng
-              </div>
+              </Badge>
 
               <h1 className="mt-5 max-w-sm text-[2.15rem] font-bold leading-[1.15] tracking-tight text-white">
                 Hóa đơn bán hàng, gọn trong một màn hình.
@@ -169,15 +175,12 @@ export default async function LoginPage({
 
               <LoginForm nextPath={nextPath} />
 
-              <div className="mt-8 flex items-start gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-[11px] leading-5 text-slate-500">
-                <span className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full bg-slate-200 text-[9px] font-bold text-slate-500">
-                  i
-                </span>
-                <span>
-                  Quên mật khẩu? Liên hệ quản trị viên để được cấp lại. Tài
-                  khoản được quản lý trong file cấu hình JSON của server.
-                </span>
-              </div>
+              <Alert className="mt-8 gap-2.5 border-slate-200 bg-slate-50 px-3.5 py-3 text-slate-500">
+                <Info className="mt-0.5" />
+                <AlertDescription className="text-[11px] leading-5">
+                  Quên mật khẩu? Liên hệ quản trị viên để được cấp lại.
+                </AlertDescription>
+              </Alert>
 
               <p className="mt-6 text-center text-[10px] text-slate-400">
                 © {new Date().getFullYear()} FOTAMI Care · Internal use only

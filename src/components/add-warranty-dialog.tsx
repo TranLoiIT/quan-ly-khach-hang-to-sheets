@@ -7,7 +7,6 @@ import {
   BadgeCheck,
   CalendarDays,
   Hash,
-  Loader2,
   MapPin,
   Package,
   Phone,
@@ -19,7 +18,29 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { useDialogBehavior } from "@/components/use-dialog-behavior";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { Textarea } from "@/components/ui/textarea";
 import type { CreatedRegistrationSummary } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
@@ -43,19 +64,6 @@ type TopFieldKey = Exclude<keyof WarrantyFormValues, "products">;
 
 const VALIDATION_SUMMARY =
   "Vui lòng nhập đầy đủ các trường bắt buộc trước khi lưu hóa đơn.";
-
-const inputBase =
-  "w-full rounded-xl border bg-white px-3.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:ring-4 disabled:cursor-not-allowed disabled:bg-slate-50";
-
-function inputClass(hasError: boolean): string {
-  return cn(
-    inputBase,
-    "h-11",
-    hasError
-      ? "border-red-300 focus:border-red-400 focus:ring-red-500/10"
-      : "border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/10",
-  );
-}
 
 function fieldElementId(key: string): string {
   if (key.startsWith("products.")) {
@@ -84,8 +92,6 @@ export function AddWarrantyDialog({
   function handleClose() {
     if (!isSaving) onClose();
   }
-
-  useDialogBehavior(true, handleClose, isSaving);
 
   function clearValidationSummary() {
     setFormError((current) =>
@@ -265,67 +271,67 @@ export function AddWarrantyDialog({
   }
 
   return (
-    <div
-      className="animate-fade-in fixed inset-0 z-50 flex items-end justify-center bg-slate-950/50 p-0 backdrop-blur-sm sm:items-center sm:p-4"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) handleClose();
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) handleClose();
       }}
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="add-warranty-title"
-        aria-describedby="add-warranty-description"
-        className="animate-pop-in flex max-h-[96dvh] w-full max-w-3xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-h-[92dvh] sm:rounded-2xl"
+      <DialogContent
+        showCloseButton={false}
+        className="flex max-h-[92dvh] w-[calc(100%-1.5rem)] max-w-3xl flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl"
       >
-        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5">
+        <DialogHeader className="flex shrink-0 flex-row items-start justify-between gap-3 space-y-0 border-b border-border px-4 py-4 text-left sm:px-6 sm:py-5">
           <div className="flex items-center gap-3">
-            <span className="grid h-9 w-9 sm:h-10 sm:w-10 shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
-              <BadgeCheck className="h-5 w-5" />
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100 sm:size-10">
+              <BadgeCheck className="size-5" />
             </span>
             <div>
-              <h2
-                id="add-warranty-title"
-                className="text-sm sm:text-base font-semibold tracking-tight text-slate-900"
-              >
+              <DialogTitle className="text-sm font-semibold tracking-tight text-foreground sm:text-base">
                 Tạo hóa đơn bán hàng
-              </h2>
-              <p id="add-warranty-description" className="mt-0.5 text-[11px] sm:text-xs text-slate-500">
+              </DialogTitle>
+              <DialogDescription className="mt-0.5 text-[11px] text-muted-foreground sm:text-xs">
                 Mỗi sản phẩm sẽ được ghi thành một dòng trong Google Sheet.
                 Mã hóa đơn được tạo tự động sau khi lưu.
-              </p>
+              </DialogDescription>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={handleClose}
-            disabled={isSaving}
-            aria-label="Đóng"
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:opacity-50"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+          <DialogClose asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              onClick={handleClose}
+              disabled={isSaving}
+              aria-label="Đóng"
+              className="shrink-0 text-muted-foreground"
+            >
+              <X className="size-4" />
+            </Button>
+          </DialogClose>
+        </DialogHeader>
 
         <form
           onSubmit={handleSubmit}
           noValidate
           aria-busy={isSaving}
-          className="flex min-h-0 flex-1 flex-col"
+          className="flex min-h-0 flex-1 flex-col overflow-hidden"
         >
-          <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5">
-            <fieldset
+          <div className="scrollbar-thin min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5">
+            <FieldSet
               disabled={isSaving}
-              className="m-0 min-w-0 space-y-6 border-0 p-0"
+              className="m-0 min-w-0 gap-6 border-0 p-0"
             >
               {formError && (
-                <div
-                  role="alert"
-                  className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-xs leading-5 text-red-700"
+                <Alert
+                  variant="destructive"
+                  className="border-red-200 bg-red-50 text-red-700"
                 >
-                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span>{formError}</span>
-                </div>
+                  <AlertCircle />
+                  <AlertDescription className="text-xs leading-5 text-red-700">
+                    {formError}
+                  </AlertDescription>
+                </Alert>
               )}
 
               <Section
@@ -459,21 +465,22 @@ export function AddWarrantyDialog({
               <div id="warranty-products-section" className="scroll-mt-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="flex items-start gap-3">
-                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-sky-50 text-sky-600 ring-1 ring-sky-100">
-                      <Package className="h-4 w-4" />
+                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-sky-50 text-sky-600 ring-1 ring-sky-100">
+                      <Package className="size-4" />
                     </span>
                     <div>
-                      <h3 className="text-sm font-semibold tracking-tight text-slate-900">
+                      <h3 className="text-sm font-semibold tracking-tight text-foreground">
                         Sản phẩm bán
                       </h3>
-                      <p className="mt-0.5 text-[11px] text-slate-500">
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">
                         Mặc định 1 sản phẩm. Thêm tối đa{" "}
                         {MAX_PRODUCTS_PER_TICKET} sản phẩm cho mỗi hóa đơn.
                       </p>
                     </div>
                   </div>
-                  <button
+                  <Button
                     type="button"
+                    variant="outline"
                     onClick={addProduct}
                     disabled={
                       isSaving ||
@@ -484,32 +491,39 @@ export function AddWarrantyDialog({
                         ? `Mỗi hóa đơn chỉ hỗ trợ tối đa ${MAX_PRODUCTS_PER_TICKET} sản phẩm`
                         : "Thêm một dòng sản phẩm"
                     }
-                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 text-xs font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="h-9 gap-1.5 border-emerald-200 bg-emerald-50 px-3 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
                   >
-                    <Plus className="h-3.5 w-3.5" />
+                    <Plus className="size-3.5" />
                     Thêm sản phẩm
-                  </button>
+                  </Button>
                 </div>
 
                 {errors.products && (
-                  <p className="mt-3 text-xs text-red-600">{errors.products}</p>
+                  <FieldError className="mt-3 text-xs">
+                    {errors.products}
+                  </FieldError>
                 )}
 
-                <div className="mt-4 space-y-3">
+                <FieldGroup className="mt-4 gap-3">
                   {values.products.map((product, index) => (
-                    <div
+                    <Card
                       key={index}
-                      className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4"
+                      className="gap-3 bg-muted/40 p-4 shadow-none"
                     >
-                      <div className="mb-3 flex items-center justify-between gap-3">
-                        <span className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700">
-                          <span className="grid h-6 w-6 place-items-center rounded-lg bg-white text-[10px] font-bold text-slate-500 ring-1 ring-slate-200">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="inline-flex items-center gap-2 text-xs font-semibold text-foreground">
+                          <Badge
+                            variant="secondary"
+                            className="size-6 justify-center rounded-lg p-0 text-[10px] font-bold text-muted-foreground"
+                          >
                             {index + 1}
-                          </span>
+                          </Badge>
                           Sản phẩm {index + 1}
                         </span>
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="sm"
                           onClick={() => removeProduct(index)}
                           disabled={isSaving || values.products.length <= 1}
                           aria-label={`Xoá sản phẩm ${index + 1}`}
@@ -518,14 +532,14 @@ export function AddWarrantyDialog({
                               ? "Hóa đơn phải có ít nhất 1 sản phẩm"
                               : "Xoá sản phẩm này"
                           }
-                          className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg px-2 text-[11px] font-medium text-slate-400 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:cursor-not-allowed disabled:opacity-40"
+                          className="gap-1.5 text-[11px] font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Trash2 className="size-3.5" />
                           Xoá
-                        </button>
+                        </Button>
                       </div>
 
-                      <div className="grid gap-3 sm:grid-cols-2">
+                      <FieldGroup className="grid gap-3 sm:grid-cols-2">
                         <TextField
                           id={`warranty-product-${index}-productName`}
                           label="Tên sản phẩm"
@@ -585,50 +599,51 @@ export function AddWarrantyDialog({
                           icon={CalendarDays}
                           onBlur={() => validateProductField(index, "saleDate")}
                         />
-                      </div>
-                    </div>
+                      </FieldGroup>
+                    </Card>
                   ))}
-                </div>
+                </FieldGroup>
               </div>
-            </fieldset>
+            </FieldSet>
           </div>
 
-          <div className="flex shrink-0 flex-col-reverse gap-2.5 border-t border-slate-100 bg-slate-50/80 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
-            <p className="text-[10px] sm:text-xs leading-4 text-slate-400">
-              <span className="font-semibold text-slate-500">Lưu ý:</span> dấu{" "}
-              <span className="text-red-500">*</span> là bắt buộc.
+          <DialogFooter className="mx-0 mb-0 shrink-0 flex-col-reverse gap-2.5 rounded-none border-t border-border bg-muted/50 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
+            <p className="text-[10px] leading-4 text-muted-foreground sm:text-xs">
+              <span className="font-semibold text-foreground/70">Lưu ý:</span>{" "}
+              dấu <span className="text-red-500">*</span> là bắt buộc.
             </p>
             <div className="flex items-center justify-end gap-2">
-              <button
+              <Button
                 type="button"
+                variant="outline"
                 onClick={handleClose}
                 disabled={isSaving}
-                className="flex-1 sm:flex-initial inline-flex h-10 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                className="h-10 flex-1 px-4 text-sm font-medium sm:flex-initial"
               >
                 Huỷ
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
                 disabled={isSaving}
-                className="flex-1 sm:flex-initial inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white shadow-sm shadow-emerald-600/20 transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
+                className="h-10 flex-1 gap-2 px-4 text-sm font-semibold shadow-sm shadow-emerald-600/20 sm:flex-initial"
               >
                 {isSaving ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Spinner className="size-4" />
                     Đang lưu...
                   </>
                 ) : (
                   <>
-                    <BadgeCheck className="h-4 w-4" />
+                    <BadgeCheck className="size-4" />
                     Lưu hóa đơn ({values.products.length})
                   </>
                 )}
-              </button>
+              </Button>
             </div>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -646,46 +661,22 @@ function Section({
   return (
     <section>
       <div className="flex items-start gap-3">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
-          <Icon className="h-4 w-4" />
+        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
+          <Icon className="size-4" />
         </span>
         <div>
-          <h3 className="text-sm font-semibold tracking-tight text-slate-900">
+          <h3 className="text-sm font-semibold tracking-tight text-foreground">
             {title}
           </h3>
-          <p className="mt-0.5 text-[11px] text-slate-500">{description}</p>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">
+            {description}
+          </p>
         </div>
       </div>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">{children}</div>
+      <FieldGroup className="mt-4 grid gap-3 sm:grid-cols-2">
+        {children}
+      </FieldGroup>
     </section>
-  );
-}
-
-function FieldLabel({
-  htmlFor,
-  label,
-  required,
-  optional,
-}: {
-  htmlFor: string;
-  label: string;
-  required?: boolean;
-  optional?: boolean;
-}) {
-  return (
-    <label
-      htmlFor={htmlFor}
-      className="flex items-center gap-1 text-xs font-semibold text-slate-700"
-    >
-      {label}
-      {required ? (
-        <span className="text-red-500" aria-hidden="true">
-          *
-        </span>
-      ) : optional ? (
-        <span className="font-normal text-slate-400">(tùy chọn)</span>
-      ) : null}
-    </label>
   );
 }
 
@@ -731,18 +722,31 @@ function TextField({
   const errorId = `${id}-error`;
 
   return (
-    <div className={cn("space-y-1.5", className)}>
+    <Field
+      data-invalid={Boolean(error)}
+      className={cn("gap-1.5", className)}
+    >
       <FieldLabel
         htmlFor={id}
-        label={label}
-        required={required}
-        optional={optional}
-      />
+        className={cn(
+          "gap-1 text-xs font-semibold text-slate-700",
+          error && "text-destructive",
+        )}
+      >
+        {label}
+        {required ? (
+          <span className="text-red-500" aria-hidden="true">
+            *
+          </span>
+        ) : optional ? (
+          <span className="font-normal text-muted-foreground">(tùy chọn)</span>
+        ) : null}
+      </FieldLabel>
       <div className="relative">
         {Icon && (
-          <Icon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Icon className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         )}
-        <input
+        <Input
           id={id}
           name={id}
           type={type}
@@ -758,23 +762,21 @@ function TextField({
           aria-invalid={Boolean(error)}
           aria-describedby={error ? errorId : undefined}
           className={cn(
-            inputClass(Boolean(error)),
+            "h-11 bg-card text-base text-foreground shadow-sm sm:text-sm",
             Icon && "pl-10",
             suffix && "pr-16",
           )}
         />
         {suffix && (
-          <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">
+          <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground">
             {suffix}
           </span>
         )}
       </div>
-      {error && (
-        <p id={errorId} className="text-xs text-red-600">
-          {error}
-        </p>
-      )}
-    </div>
+      <FieldError id={errorId} className="text-xs">
+        {error}
+      </FieldError>
+    </Field>
   );
 }
 
@@ -808,13 +810,27 @@ function TextareaField({
   const errorId = `${id}-error`;
 
   return (
-    <div className={cn("space-y-1.5", className)}>
-      <FieldLabel htmlFor={id} label={label} optional={optional} />
+    <Field
+      data-invalid={Boolean(error)}
+      className={cn("gap-1.5", className)}
+    >
+      <FieldLabel
+        htmlFor={id}
+        className={cn(
+          "gap-1 text-xs font-semibold text-slate-700",
+          error && "text-destructive",
+        )}
+      >
+        {label}
+        {optional ? (
+          <span className="font-normal text-muted-foreground">(tùy chọn)</span>
+        ) : null}
+      </FieldLabel>
       <div className="relative">
         {Icon && (
-          <Icon className="pointer-events-none absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
+          <Icon className="pointer-events-none absolute left-3.5 top-3.5 size-4 text-muted-foreground" />
         )}
-        <textarea
+        <Textarea
           id={id}
           name={id}
           value={value}
@@ -827,20 +843,14 @@ function TextareaField({
           aria-invalid={Boolean(error)}
           aria-describedby={error ? errorId : undefined}
           className={cn(
-            inputBase,
-            "min-h-[84px] resize-y py-3",
+            "min-h-[84px] resize-y bg-card py-3 text-base text-foreground sm:text-sm",
             Icon && "pl-10",
-            error
-              ? "border-red-300 focus:border-red-400 focus:ring-red-500/10"
-              : "border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/10",
           )}
         />
       </div>
-      {error && (
-        <p id={errorId} className="text-xs text-red-600">
-          {error}
-        </p>
-      )}
-    </div>
+      <FieldError id={errorId} className="text-xs">
+        {error}
+      </FieldError>
+    </Field>
   );
 }

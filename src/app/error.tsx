@@ -1,6 +1,8 @@
 "use client";
 
 import { AlertCircle, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 export default function ErrorPage({
   error,
@@ -10,32 +12,32 @@ export default function ErrorPage({
   reset: () => void;
 }) {
   return (
-    <main className="grid min-h-dvh place-items-center bg-slate-50 px-4">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-        <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-red-600 ring-1 ring-red-100">
-          <AlertCircle className="h-6 w-6" />
+    <main className="grid min-h-screen min-h-dvh place-items-center bg-background px-4 py-8">
+      <Card className="w-full max-w-md gap-0 p-8 text-center shadow-sm">
+        <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-destructive/10 text-destructive ring-1 ring-destructive/20">
+          <AlertCircle className="size-6" />
         </span>
-        <h1 className="mt-5 text-lg font-semibold tracking-tight text-slate-900">
+        <h1 className="mt-5 text-lg font-semibold tracking-tight text-foreground">
           Đã có lỗi xảy ra
         </h1>
-        <p className="mt-2 text-sm leading-6 text-slate-500">
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
           Trang không thể tải đúng. Hãy thử lại. Nếu lỗi tiếp tục xuất hiện,
           kiểm tra log trên Vercel hoặc cấu hình Google Sheets.
         </p>
         {error.digest && (
-          <p className="mt-3 text-[10px] text-slate-400">
+          <p className="mt-3 text-[10px] text-muted-foreground">
             Mã lỗi: {error.digest}
           </p>
         )}
-        <button
+        <Button
           type="button"
           onClick={reset}
-          className="mt-6 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+          className="mt-6 h-10 gap-2 self-center px-4 text-sm font-semibold"
         >
-          <RotateCcw className="h-4 w-4" />
+          <RotateCcw className="size-4" />
           Thử lại
-        </button>
-      </div>
+        </Button>
+      </Card>
     </main>
   );
 }

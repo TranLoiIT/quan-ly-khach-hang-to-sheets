@@ -7,10 +7,19 @@ import {
   ArrowRight,
   Eye,
   EyeOff,
-  Loader2,
   Lock,
   User,
 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
 type LoginApiResponse = {
@@ -72,136 +81,145 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-8 space-y-5" noValidate>
-      {error && (
-        <div
-          role="alert"
-          aria-live="polite"
-          className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700"
-        >
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
-
-      <div className="space-y-1.5">
-        <label
-          htmlFor="username"
-          className="block text-xs font-semibold text-slate-700"
-        >
-          Tên đăng nhập
-        </label>
-        <div className="relative">
-          <User className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            id="username"
-            name="username"
-            type="text"
-            autoComplete="username"
-            autoCapitalize="none"
-            autoCorrect="off"
-            spellCheck={false}
-            autoFocus
-            value={username}
-            onChange={(event) => {
-              setUsername(event.target.value);
-              if (fieldErrors.username) {
-                setFieldErrors((current) => ({ ...current, username: "" }));
-              }
-            }}
-            disabled={isSubmitting}
-            aria-invalid={Boolean(fieldErrors.username)}
-            aria-describedby={
-              fieldErrors.username ? "username-error" : undefined
-            }
-            placeholder="vd: admin"
-            className={cn(
-              "h-11 w-full rounded-xl border bg-white pl-10 pr-3.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:ring-4 disabled:cursor-not-allowed disabled:bg-slate-50",
-              fieldErrors.username
-                ? "border-red-300 focus:border-red-400 focus:ring-red-500/10"
-                : "border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/10",
-            )}
-          />
-        </div>
-        {fieldErrors.username && (
-          <p id="username-error" className="text-xs text-red-600">
-            {fieldErrors.username}
-          </p>
-        )}
-      </div>
-
-      <div className="space-y-1.5">
-        <label
-          htmlFor="password"
-          className="block text-xs font-semibold text-slate-700"
-        >
-          Mật khẩu
-        </label>
-        <div className="relative">
-          <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            id="password"
-            name="password"
-            type={showPassword ? "text" : "password"}
-            autoComplete="current-password"
-            value={password}
-            onChange={(event) => {
-              setPassword(event.target.value);
-              if (fieldErrors.password) {
-                setFieldErrors((current) => ({ ...current, password: "" }));
-              }
-            }}
-            disabled={isSubmitting}
-            aria-invalid={Boolean(fieldErrors.password)}
-            aria-describedby={
-              fieldErrors.password ? "password-error" : undefined
-            }
-            placeholder="Nhập mật khẩu"
-            className={cn(
-              "h-11 w-full rounded-xl border bg-white pl-10 pr-11 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:ring-4 disabled:cursor-not-allowed disabled:bg-slate-50",
-              fieldErrors.password
-                ? "border-red-300 focus:border-red-400 focus:ring-red-500/10"
-                : "border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/10",
-            )}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword((current) => !current)}
-            aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-            className="absolute right-1.5 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
-            tabIndex={-1}
+    <form onSubmit={handleSubmit} className="mt-8" noValidate>
+      <FieldGroup className="gap-5">
+        {error && (
+          <Alert
+            variant="destructive"
+            className="border-red-200 bg-red-50 text-red-700"
           >
-            {showPassword ? (
-              <EyeOff className="h-4 w-4" />
-            ) : (
-              <Eye className="h-4 w-4" />
-            )}
-          </button>
-        </div>
-        {fieldErrors.password && (
-          <p id="password-error" className="text-xs text-red-600">
-            {fieldErrors.password}
-          </p>
+            <AlertCircle />
+            <AlertDescription className="text-xs leading-5 text-red-700">
+              {error}
+            </AlertDescription>
+          </Alert>
         )}
-      </div>
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="group flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white shadow-sm shadow-emerald-600/20 transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
-      >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Đang đăng nhập...
-          </>
-        ) : (
-          <>
-            Đăng nhập
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-          </>
-        )}
-      </button>
+        <Field
+          data-invalid={Boolean(fieldErrors.username)}
+          className="gap-1.5"
+        >
+          <FieldLabel
+            htmlFor="username"
+            className={cn(
+              "text-xs font-semibold text-slate-700",
+              fieldErrors.username && "text-red-600",
+            )}
+          >
+            Tên đăng nhập
+          </FieldLabel>
+          <div className="relative">
+            <User className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Input
+              id="username"
+              name="username"
+              type="text"
+              autoComplete="username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              autoFocus
+              value={username}
+              onChange={(event) => {
+                setUsername(event.target.value);
+                if (fieldErrors.username) {
+                  setFieldErrors((current) => ({ ...current, username: "" }));
+                }
+              }}
+              disabled={isSubmitting}
+              aria-invalid={Boolean(fieldErrors.username)}
+              aria-describedby={
+                fieldErrors.username ? "username-error" : undefined
+              }
+              placeholder="vd: admin"
+              className={cn(
+                "h-11 bg-white pl-10 text-foreground shadow-sm",
+                fieldErrors.username && "border-red-300",
+              )}
+            />
+          </div>
+          <FieldError id="username-error" className="text-xs">
+            {fieldErrors.username}
+          </FieldError>
+        </Field>
+
+        <Field
+          data-invalid={Boolean(fieldErrors.password)}
+          className="gap-1.5"
+        >
+          <FieldLabel
+            htmlFor="password"
+            className={cn(
+              "text-xs font-semibold text-slate-700",
+              fieldErrors.password && "text-red-600",
+            )}
+          >
+            Mật khẩu
+          </FieldLabel>
+          <div className="relative">
+            <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => {
+                setPassword(event.target.value);
+                if (fieldErrors.password) {
+                  setFieldErrors((current) => ({ ...current, password: "" }));
+                }
+              }}
+              disabled={isSubmitting}
+              aria-invalid={Boolean(fieldErrors.password)}
+              aria-describedby={
+                fieldErrors.password ? "password-error" : undefined
+              }
+              placeholder="Nhập mật khẩu"
+              className={cn(
+                "h-11 bg-white pl-10 pr-11 text-foreground shadow-sm",
+                fieldErrors.password && "border-red-300",
+              )}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setShowPassword((current) => !current)}
+              aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 active:-translate-y-1/2"
+              tabIndex={-1}
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+          <FieldError id="password-error" className="text-xs">
+            {fieldErrors.password}
+          </FieldError>
+        </Field>
+
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="group h-11 w-full gap-2 text-sm font-semibold shadow-sm shadow-emerald-600/20"
+        >
+          {isSubmitting ? (
+            <>
+              <Spinner className="h-4 w-4" />
+              Đang đăng nhập...
+            </>
+          ) : (
+            <>
+              Đăng nhập
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </>
+          )}
+        </Button>
+      </FieldGroup>
     </form>
   );
 }

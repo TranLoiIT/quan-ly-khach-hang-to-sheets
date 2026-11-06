@@ -7,13 +7,11 @@ import {
   Building2,
   CalendarDays,
   Check,
-  CheckCircle2,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Copy,
   FileSpreadsheet,
-  FileText,
-  Loader2,
   LogOut,
   MapPin,
   Package,
@@ -27,9 +25,48 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
+import { toast } from "sonner";
 import { AddWarrantyDialog } from "@/components/add-warranty-dialog";
 import { Brand } from "@/components/brand";
 import { DeleteRecordDialog } from "@/components/delete-record-dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { Input } from "@/components/ui/input";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import type {
   CreatedRegistrationSummary,
   RowsResponse,
@@ -48,16 +85,9 @@ const PAGE_SIZE = 10;
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-const secondaryButton =
-  "inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
-
-const primaryButton =
-  "inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-xs font-semibold text-white shadow-sm shadow-emerald-600/20 transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70";
-
 type RowsApiResponse = RowsResponse & { error?: string };
 type DeleteApiResponse = { ok?: boolean; id?: string; error?: string };
 type RowsMeta = Omit<RowsResponse, "rows">;
-type ToastState = { type: "success" | "error"; message: string };
 
 export function DashboardClient({ user }: { user: SessionUser }) {
   const router = useRouter();
@@ -75,8 +105,15 @@ export function DashboardClient({ user }: { user: SessionUser }) {
   const [deleteTarget, setDeleteTarget] = useState<WarrantyRecord | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [toast, setToast] = useState<ToastState | null>(null);
   const [copiedSerial, setCopiedSerial] = useState<string | null>(null);
+
+  function showToast(type: "success" | "error", message: string) {
+    if (type === "success") {
+      toast.success("Thành công", { description: message });
+    } else {
+      toast.error("Có lỗi", { description: message });
+    }
+  }
 
   function copyToClipboard(text: string, label: string) {
     if (!text) return;
@@ -97,12 +134,6 @@ export function DashboardClient({ user }: { user: SessionUser }) {
 
     return () => clearTimeout(timeout);
   }, [query]);
-
-  useEffect(() => {
-    if (!toast) return;
-    const timeout = setTimeout(() => setToast(null), 4500);
-    return () => clearTimeout(timeout);
-  }, [toast]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -181,10 +212,6 @@ export function DashboardClient({ user }: { user: SessionUser }) {
 
   function retry() {
     setRefreshKey((current) => current + 1);
-  }
-
-  function showToast(type: ToastState["type"], message: string) {
-    setToast({ type, message });
   }
 
   function clearSearch() {
@@ -286,185 +313,211 @@ export function DashboardClient({ user }: { user: SessionUser }) {
     icon: LucideIcon;
     iconClass: string;
   }> = [
-      {
-        label: "Tổng sản phẩm",
-        value: meta ? meta.total.toLocaleString("vi-VN") : "—",
-        hint: "Tất cả dòng sản phẩm trong Google Sheet",
-        icon: Package,
-        iconClass: "bg-emerald-50 text-emerald-600 ring-emerald-100",
-      },
-      {
-        label: "Tổng hóa đơn",
-        value: meta ? meta.registrations.toLocaleString("vi-VN") : "—",
-        hint: "Mỗi mã hóa đơn có thể gồm nhiều sản phẩm",
-        icon: FileSpreadsheet,
-        iconClass: "bg-sky-50 text-sky-600 ring-sky-100",
-      },
-      {
-        label: "Kết quả lọc",
-        value: meta ? meta.filtered.toLocaleString("vi-VN") : "—",
-        hint: debouncedQuery
-          ? meta
-            ? `${meta.filteredRegistrations.toLocaleString("vi-VN")} hóa đơn khớp từ khoá`
-            : "Đang lọc dữ liệu"
-          : "Chưa áp dụng bộ lọc",
-        icon: Search,
-        iconClass: "bg-violet-50 text-violet-600 ring-violet-100",
-      },
-    ];
+    {
+      label: "Tổng sản phẩm",
+      value: meta ? meta.total.toLocaleString("vi-VN") : "—",
+      hint: "Tất cả dòng sản phẩm trong Google Sheet",
+      icon: Package,
+      iconClass: "bg-emerald-50 text-emerald-600 ring-emerald-100",
+    },
+    {
+      label: "Tổng hóa đơn",
+      value: meta ? meta.registrations.toLocaleString("vi-VN") : "—",
+      hint: "Mỗi mã hóa đơn có thể gồm nhiều sản phẩm",
+      icon: FileSpreadsheet,
+      iconClass: "bg-sky-50 text-sky-600 ring-sky-100",
+    },
+    {
+      label: "Kết quả lọc",
+      value: meta ? meta.filtered.toLocaleString("vi-VN") : "—",
+      hint: debouncedQuery
+        ? meta
+          ? `${meta.filteredRegistrations.toLocaleString("vi-VN")} hóa đơn khớp từ khoá`
+          : "Đang lọc dữ liệu"
+        : "Chưa áp dụng bộ lọc",
+      icon: Search,
+      iconClass: "bg-violet-50 text-violet-600 ring-violet-100",
+    },
+  ];
 
   return (
-    <div className="min-h-dvh bg-slate-50">
-      <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/85 backdrop-blur">
+    <div className="flex min-h-screen min-h-dvh flex-col bg-background">
+      <header className="sticky top-0 z-30 border-b border-border/80 bg-card/85 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <Brand subtitle="Quản lý bán hàng" />
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="hidden items-center gap-2.5 rounded-full border border-slate-200 bg-white py-1.5 pl-1.5 pr-3 sm:flex">
-              <span className="grid h-7 w-7 place-items-center rounded-full bg-emerald-100 text-[10px] font-bold text-emerald-700">
-                {getInitials(user.name)}
-              </span>
-              <div className="min-w-0 leading-tight">
-                <p className="max-w-[150px] truncate text-xs font-semibold text-slate-800">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                aria-label={`Tài khoản ${user.name}`}
+                className="h-10 gap-2.5 rounded-full bg-card pl-1.5 pr-3 shadow-sm"
+              >
+                <Avatar className="size-7 after:border-emerald-200">
+                  <AvatarFallback className="bg-emerald-100 text-[10px] font-bold text-emerald-700">
+                    {getInitials(user.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="hidden min-w-0 text-left leading-tight sm:block">
+                  <span className="block max-w-[150px] truncate text-xs font-semibold text-foreground">
+                    {user.name}
+                  </span>
+                  <span className="block text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
+                    {user.role === "admin" ? "Quản trị viên" : "Thành viên"}
+                  </span>
+                </span>
+                <ChevronDown className="size-3.5 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-60">
+              <DropdownMenuLabel>
+                <p className="truncate text-sm font-semibold text-foreground">
                   {user.name}
                 </p>
-                <p className="text-[9px] font-medium uppercase tracking-wider text-slate-400">
+                <p className="truncate text-xs font-normal text-muted-foreground">
+                  @{user.username} ·{" "}
                   {user.role === "admin" ? "Quản trị viên" : "Thành viên"}
                 </p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              disabled={isLoggingOut}
-              aria-label={isLoggingOut ? "Đang đăng xuất" : "Đăng xuất"}
-              className={secondaryButton}
-            >
-              {isLoggingOut ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <LogOut className="h-4 w-4" />
-              )}
-              <span className="hidden sm:inline">
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                disabled={isLoggingOut}
+                onSelect={() => void handleLogout()}
+                className="gap-2"
+              >
+                {isLoggingOut ? (
+                  <Spinner className="size-4" />
+                ) : (
+                  <LogOut className="size-4" />
+                )}
                 {isLoggingOut ? "Đang thoát..." : "Đăng xuất"}
-              </span>
-            </button>
-          </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
         <div className="flex flex-col gap-3.5 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-700">
-              <span className="grid h-5 w-5 place-items-center rounded-md bg-emerald-100">
-                <ShieldCheck className="h-3 w-3" />
-              </span>
+            <Badge
+              variant="outline"
+              className="h-auto gap-2 rounded-md border-emerald-200 bg-emerald-50 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-700"
+            >
+              <ShieldCheck />
               Dữ liệu bán hàng
-            </div>
-            <h1 className="mt-1.5 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl lg:text-3xl">
+            </Badge>
+            <h1 className="mt-2.5 text-xl font-bold tracking-tight text-foreground sm:text-2xl lg:text-3xl">
               Hóa đơn bán hàng
             </h1>
-            <p className="mt-1 max-w-2xl text-xs sm:text-sm text-slate-500">
+            <p className="mt-1 max-w-2xl text-xs text-muted-foreground sm:text-sm">
               Tạo hóa đơn bán hàng cho một hoặc nhiều sản phẩm và tra cứu
               nhanh theo mã hóa đơn, đại lý, khách mua hàng hoặc serial.
             </p>
           </div>
 
-          <button
+          <Button
             type="button"
             onClick={() => setIsAddOpen(true)}
-            className={cn(primaryButton, "w-full justify-center sm:w-auto")}
+            className="h-10 w-full gap-2 px-4 text-xs font-semibold shadow-sm shadow-emerald-600/20 sm:w-auto"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="size-4" />
             Tạo hóa đơn
-          </button>
+          </Button>
         </div>
 
         <section className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {stats.map((stat) => {
             const Icon = stat.icon;
             return (
-              <article
-                key={stat.label}
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                      {stat.label}
-                    </p>
-                    <p className="mt-2 text-2xl font-bold tabular-nums tracking-tight text-slate-900">
-                      {stat.value}
-                    </p>
+              <Card key={stat.label} className="gap-0 py-0 shadow-sm">
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                        {stat.label}
+                      </p>
+                      <p className="mt-2 text-2xl font-bold tabular-nums tracking-tight text-foreground">
+                        {stat.value}
+                      </p>
+                    </div>
+                    <span
+                      className={cn(
+                        "grid size-10 shrink-0 place-items-center rounded-xl ring-1",
+                        stat.iconClass,
+                      )}
+                    >
+                      <Icon className="size-5" />
+                    </span>
                   </div>
-                  <span
-                    className={cn(
-                      "grid h-10 w-10 shrink-0 place-items-center rounded-xl ring-1",
-                      stat.iconClass,
-                    )}
-                  >
-                    <Icon className="h-4.5 w-4.5" />
-                  </span>
-                </div>
-                <p className="mt-3 truncate text-[11px] text-slate-400">
-                  {stat.hint}
-                </p>
-              </article>
+                  <p className="mt-3 truncate text-[11px] text-muted-foreground">
+                    {stat.hint}
+                  </p>
+                </CardContent>
+              </Card>
             );
           })}
         </section>
 
-        <section className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex flex-col gap-2.5 border-b border-slate-100 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+        <Card className="mt-5 gap-0 overflow-hidden py-0 shadow-sm">
+          <div className="flex flex-col gap-2.5 border-b border-border p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
             <div className="relative w-full sm:max-w-md">
-              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Tìm mã hóa đơn, đại lý, khách mua hàng, serial..."
                 aria-label="Tìm kiếm hóa đơn bán hàng"
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-9 text-xs text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 [&::-webkit-search-cancel-button]:hidden"
+                className="h-10 bg-card pl-9 pr-9 text-xs shadow-sm [&::-webkit-search-cancel-button]:hidden"
               />
               {query && (
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon-xs"
                   onClick={clearSearch}
                   aria-label="Xoá từ khoá tìm kiếm"
-                  className="absolute right-1.5 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-foreground active:-translate-y-1/2"
                 >
-                  <X className="h-3.5 w-3.5" />
-                </button>
+                  <X className="size-3.5" />
+                </Button>
               )}
             </div>
 
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={retry}
               disabled={isLoading}
-              className={cn(secondaryButton, "w-full justify-center sm:w-auto")}
+              className="h-10 w-full gap-2 px-3.5 text-xs font-semibold shadow-sm sm:w-auto"
             >
-              <RefreshCw
-                className={cn("h-4 w-4", isLoading && "animate-spin")}
-              />
+              {isLoading ? (
+                <Spinner className="size-4" />
+              ) : (
+                <RefreshCw className="size-4" />
+              )}
               Làm mới
-            </button>
+            </Button>
           </div>
 
           {error && rows.length > 0 && (
-            <div className="flex items-start gap-2.5 border-b border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800">
-              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-              <span className="flex-1">{error}</span>
-              <button
+            <Alert className="flex items-center gap-2.5 rounded-none border-x-0 border-t-0 border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800 [&>svg]:row-span-1 [&>svg]:translate-y-0">
+              <AlertCircle className="size-4 shrink-0" />
+              <AlertDescription className="flex-1 text-xs leading-5 text-amber-800">
+                {error}
+              </AlertDescription>
+              <Button
                 type="button"
+                variant="link"
+                size="xs"
                 onClick={retry}
-                className="font-semibold underline underline-offset-2 hover:text-amber-900"
+                className="h-auto shrink-0 p-0 text-xs font-semibold text-amber-800"
               >
                 Thử lại
-              </button>
-            </div>
+              </Button>
+            </Alert>
           )}
 
           <div
@@ -473,151 +526,161 @@ export function DashboardClient({ user }: { user: SessionUser }) {
               isLoading && rows.length > 0 && "opacity-60",
             )}
           >
-            <table className="w-full text-left text-sm">
-              <caption className="sr-only">
+            <Table className="min-w-[900px] text-left">
+              <TableCaption className="sr-only">
                 Danh sách sản phẩm trong hóa đơn bán hàng
-              </caption>
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50/90">
-                  <th className="w-12 px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider text-slate-500">
+              </TableCaption>
+              <TableHeader>
+                <TableRow className="border-border bg-muted/60 hover:bg-muted/60">
+                  <TableHead className="w-12 px-4 text-center text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     #
-                  </th>
-                  <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  </TableHead>
+                  <TableHead className="px-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     Mã hóa đơn
-                  </th>
-                  <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  </TableHead>
+                  <TableHead className="px-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     Đại lý
-                  </th>
-                  <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  </TableHead>
+                  <TableHead className="px-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     Khách mua hàng
-                  </th>
-                  <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  </TableHead>
+                  <TableHead className="px-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     Sản phẩm & Model
-                  </th>
-                  <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  </TableHead>
+                  <TableHead className="px-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     Serial (S/N)
-                  </th>
-                  <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  </TableHead>
+                  <TableHead className="px-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     Bảo hành
-                  </th>
-                  <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  </TableHead>
+                  <TableHead className="px-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     Ngày bán
-                  </th>
-                  <th className="w-14 px-4 py-3.5 text-right">
+                  </TableHead>
+                  <TableHead className="w-14 px-4 text-right">
                     <span className="sr-only">Thao tác</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {isLoading && rows.length === 0 ? (
                   <SkeletonRows />
                 ) : error && rows.length === 0 ? (
-                  <tr>
-                    <td colSpan={9}>
-                      <div className="flex flex-col items-center px-6 py-16 text-center">
-                        <span className="grid h-14 w-14 place-items-center rounded-2xl bg-amber-50 text-amber-600 ring-1 ring-amber-100">
-                          <AlertCircle className="h-6 w-6" />
-                        </span>
-                        <h3 className="mt-4 text-base font-semibold text-slate-800">
-                          Không tải được dữ liệu
-                        </h3>
-                        <p className="mt-1 max-w-md text-sm leading-5 text-slate-500">
-                          {error}
-                        </p>
-                        <button
-                          type="button"
-                          onClick={retry}
-                          className={cn(secondaryButton, "mt-4")}
-                        >
-                          <RefreshCw className="h-4 w-4" />
-                          Thử lại
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell colSpan={9} className="whitespace-normal p-0">
+                      <Empty className="rounded-none border-0 py-14">
+                        <EmptyHeader>
+                          <EmptyMedia
+                            variant="icon"
+                            className="size-14 rounded-2xl bg-amber-50 text-amber-600 ring-1 ring-amber-100 [&_svg]:size-6"
+                          >
+                            <AlertCircle />
+                          </EmptyMedia>
+                          <EmptyTitle>Không tải được dữ liệu</EmptyTitle>
+                          <EmptyDescription>{error}</EmptyDescription>
+                        </EmptyHeader>
+                        <EmptyContent>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={retry}
+                            className="h-10 gap-2"
+                          >
+                            <RefreshCw className="size-4" />
+                            Thử lại
+                          </Button>
+                        </EmptyContent>
+                      </Empty>
+                    </TableCell>
+                  </TableRow>
                 ) : rows.length === 0 ? (
-                  <tr>
-                    <td colSpan={9}>
-                      <div className="flex flex-col items-center px-6 py-16 text-center">
-                        <span className="grid h-14 w-14 place-items-center rounded-2xl bg-slate-100 text-slate-500">
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell colSpan={9} className="whitespace-normal p-0">
+                      <Empty className="rounded-none border-0 py-14">
+                        <EmptyHeader>
+                          <EmptyMedia
+                            variant="icon"
+                            className="size-14 rounded-2xl bg-muted text-muted-foreground [&_svg]:size-6"
+                          >
+                            {debouncedQuery ? <Search /> : <FileSpreadsheet />}
+                          </EmptyMedia>
+                          <EmptyTitle>
+                            {debouncedQuery
+                              ? "Không tìm thấy hóa đơn/sản phẩm"
+                              : "Chưa có hóa đơn"}
+                          </EmptyTitle>
+                          <EmptyDescription>
+                            {debouncedQuery
+                              ? `Không có dòng sản phẩm nào khớp với "${debouncedQuery}". Thử từ khoá khác hoặc xoá bộ lọc.`
+                              : "Hóa đơn đầu tiên sẽ được ghi vào Google Sheet và hiển thị tại đây."}
+                          </EmptyDescription>
+                        </EmptyHeader>
+                        <EmptyContent>
                           {debouncedQuery ? (
-                            <Search className="h-6 w-6" />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={clearSearch}
+                              className="h-10 gap-2"
+                            >
+                              <X className="size-4" />
+                              Xoá tìm kiếm
+                            </Button>
                           ) : (
-                            <FileSpreadsheet className="h-6 w-6" />
+                            <Button
+                              type="button"
+                              onClick={() => setIsAddOpen(true)}
+                              className="h-10 gap-2"
+                            >
+                              <Plus className="size-4" />
+                              Tạo hóa đơn đầu tiên
+                            </Button>
                           )}
-                        </span>
-                        <h3 className="mt-4 text-base font-semibold text-slate-800">
-                          {debouncedQuery
-                            ? "Không tìm thấy hóa đơn/sản phẩm"
-                            : "Chưa có hóa đơn"}
-                        </h3>
-                        <p className="mt-1 max-w-sm text-sm leading-5 text-slate-500">
-                          {debouncedQuery
-                            ? `Không có dòng sản phẩm nào khớp với "${debouncedQuery}". Thử từ khoá khác hoặc xoá bộ lọc.`
-                            : "Hóa đơn đầu tiên sẽ được ghi vào Google Sheet và hiển thị tại đây."}
-                        </p>
-                        {debouncedQuery ? (
-                          <button
-                            type="button"
-                            onClick={clearSearch}
-                            className={cn(secondaryButton, "mt-4")}
-                          >
-                            <X className="h-4 w-4" />
-                            Xoá tìm kiếm
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => setIsAddOpen(true)}
-                            className={cn(primaryButton, "mt-4")}
-                          >
-                            <Plus className="h-4 w-4" />
-                            Tạo hóa đơn đầu tiên
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
+                        </EmptyContent>
+                      </Empty>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   rows.map((row, index) => {
                     const canDelete = UUID_RE.test(row.rowId);
                     const isSerialCopied = copiedSerial === row.serial;
                     return (
-                      <tr
+                      <TableRow
                         key={row.rowId}
-                        className="group transition-colors hover:bg-slate-50/80"
+                        className="group border-border/70 transition-colors hover:bg-muted/40"
                       >
-                        <td className="px-4 py-4 text-center text-xs font-semibold tabular-nums text-slate-400">
+                        <TableCell className="px-4 py-4 text-center text-xs font-semibold tabular-nums text-muted-foreground">
                           {rangeStart + index}
-                        </td>
+                        </TableCell>
 
                         {/* Mã hóa đơn */}
-                        <td className="px-4 py-4">
+                        <TableCell className="px-4 py-4">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono text-sm font-bold text-slate-900">
+                            <span className="font-mono text-sm font-bold text-foreground">
                               {row.registrationCode || "—"}
                             </span>
                             {row.registrationCode && (
-                              <button
+                              <Button
                                 type="button"
+                                variant="ghost"
+                                size="icon-xs"
                                 onClick={() =>
                                   copyToClipboard(row.registrationCode, "mã hóa đơn")
                                 }
                                 title="Sao chép mã hóa đơn"
-                                className="rounded-md p-1 text-slate-400 opacity-60 transition group-hover:opacity-100 hover:bg-slate-100 hover:text-slate-700 focus:opacity-100"
+                                className="text-muted-foreground opacity-60 transition group-hover:opacity-100"
                               >
-                                <Copy className="h-3.5 w-3.5" />
-                              </button>
+                                <Copy className="size-3.5" />
+                              </Button>
                             )}
                           </div>
-                          <p className="mt-1 text-xs text-slate-500">
+                          <p className="mt-1 text-xs text-muted-foreground">
                             {formatDateTime(row.createdAt)}
                           </p>
-                        </td>
+                        </TableCell>
 
                         {/* Đại lý */}
-                        <td
-                          className="px-4 py-4"
+                        <TableCell
+                          className="whitespace-normal px-4 py-4"
                           title={
                             [
                               row.dealerName,
@@ -629,195 +692,222 @@ export function DashboardClient({ user }: { user: SessionUser }) {
                           }
                         >
                           <div className="flex items-center gap-2">
-                            <Building2 className="h-4 w-4 shrink-0 text-slate-500" />
-                            <span className="text-sm font-semibold text-slate-900">
+                            <Building2 className="size-4 shrink-0 text-muted-foreground" />
+                            <span className="text-sm font-semibold text-foreground">
                               {row.dealerName || "—"}
                             </span>
                           </div>
-                          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-600">
+                          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                             {row.dealerCode && (
-                              <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs font-medium text-slate-700">
+                              <Badge
+                                variant="secondary"
+                                className="h-auto rounded px-1.5 py-0.5 font-mono text-xs font-medium"
+                              >
                                 {row.dealerCode}
-                              </span>
+                              </Badge>
                             )}
                             {row.dealerPhone && (
-                              <span className="inline-flex items-center gap-1 font-medium text-slate-500">
-                                <Phone className="h-3 w-3" />
+                              <span className="inline-flex items-center gap-1 font-medium">
+                                <Phone className="size-3" />
                                 0{row.dealerPhone}
                               </span>
                             )}
                           </div>
-                        </td>
+                        </TableCell>
 
                         {/* Khách hàng */}
-                        <td
-                          className="px-4 py-4"
+                        <TableCell
+                          className="whitespace-normal px-4 py-4"
                           title={row.customerAddress || undefined}
                         >
                           <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 shrink-0 text-slate-500" />
-                            <span className="text-sm font-semibold text-slate-900">
+                            <User className="size-4 shrink-0 text-muted-foreground" />
+                            <span className="text-sm font-semibold text-foreground">
                               {row.customerName || "—"}
                             </span>
                           </div>
-                          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-600">
+                          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                             {row.customerPhone && (
-                              <span className="inline-flex items-center gap-1 font-medium text-slate-500">
-                                <Phone className="h-3 w-3" />
+                              <span className="inline-flex items-center gap-1 font-medium">
+                                <Phone className="size-3" />
                                 0{row.customerPhone}
                               </span>
                             )}
-                            {row.customerAddress && row.customerAddress !== "-" && (
-                              <span
-                                className="inline-flex max-w-[180px] items-center gap-1 truncate text-xs text-slate-500"
-                                title={row.customerAddress}
-                              >
-                                <MapPin className="h-3 w-3 shrink-0" />
-                                {row.customerAddress}
-                              </span>
-                            )}
+                            {row.customerAddress &&
+                              row.customerAddress !== "-" && (
+                                <span
+                                  className="inline-flex max-w-[180px] items-center gap-1 truncate text-xs"
+                                  title={row.customerAddress}
+                                >
+                                  <MapPin className="size-3 shrink-0" />
+                                  {row.customerAddress}
+                                </span>
+                              )}
                           </div>
-                        </td>
+                        </TableCell>
 
                         {/* Sản phẩm & Model */}
-                        <td
-                          className="px-4 py-4"
+                        <TableCell
+                          className="whitespace-normal px-4 py-4"
                           title={row.productName || undefined}
                         >
                           <div className="flex items-center gap-2">
-                            <Package className="h-4 w-4 shrink-0 text-emerald-600" />
-                            <span className="text-sm font-semibold text-slate-900">
+                            <Package className="size-4 shrink-0 text-emerald-600" />
+                            <span className="text-sm font-semibold text-foreground">
                               {row.productName || "—"}
                             </span>
                           </div>
-                          <p className="mt-1 text-xs text-slate-500">
+                          <p className="mt-1 text-xs text-muted-foreground">
                             Model:{" "}
-                            <span className="font-medium text-slate-700">
+                            <span className="font-medium text-foreground">
                               {row.model || "—"}
                             </span>
                           </p>
-                        </td>
+                        </TableCell>
 
                         {/* Serial */}
-                        <td className="px-4 py-4">
+                        <TableCell className="px-4 py-4">
                           {row.serial && row.serial !== "-" ? (
-                            <div className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 font-mono text-xs font-semibold text-slate-800 shadow-2xs">
+                            <div className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/60 px-2.5 py-1 font-mono text-xs font-semibold text-foreground shadow-2xs">
                               <span>{row.serial}</span>
-                              <button
+                              <Button
                                 type="button"
+                                variant="ghost"
+                                size="icon-xs"
                                 onClick={() =>
                                   copyToClipboard(row.serial, "mã serial")
                                 }
                                 title="Sao chép Serial"
-                                className="rounded p-1 text-slate-400 transition hover:bg-slate-200 hover:text-emerald-700"
+                                className="text-muted-foreground hover:bg-muted hover:text-emerald-700"
                               >
                                 {isSerialCopied ? (
-                                  <Check className="h-3.5 w-3.5 text-emerald-600" />
+                                  <Check className="size-3.5 text-emerald-600" />
                                 ) : (
-                                  <Copy className="h-3.5 w-3.5" />
+                                  <Copy className="size-3.5" />
                                 )}
-                              </button>
+                              </Button>
                             </div>
                           ) : (
-                            <span className="text-slate-400">—</span>
+                            <span className="text-muted-foreground">—</span>
                           )}
-                        </td>
+                        </TableCell>
 
                         {/* Bảo hành */}
-                        <td className="px-4 py-4 whitespace-nowrap">
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-600/20">
-                            <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                        <TableCell className="whitespace-nowrap px-4 py-4">
+                          <Badge
+                            variant="outline"
+                            className="h-auto gap-1.5 rounded-full border-emerald-600/20 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800"
+                          >
+                            <ShieldCheck className="text-emerald-600" />
                             {formatWarrantyMonths(row.warrantyMonths)}
-                          </span>
-                          <p className="mt-1 text-xs text-slate-500">
+                          </Badge>
+                          <p className="mt-1 text-xs text-muted-foreground">
                             Giao: {formatDate(row.deliveryDate)}
                           </p>
-                        </td>
+                        </TableCell>
 
                         {/* Ngày bán */}
-                        <td className="px-4 py-4 whitespace-nowrap text-xs text-slate-700">
+                        <TableCell className="whitespace-nowrap px-4 py-4 text-xs text-foreground">
                           <div className="flex items-center gap-1.5 font-medium">
-                            <CalendarDays className="h-3.5 w-3.5 text-slate-400" />
+                            <CalendarDays className="size-3.5 text-muted-foreground" />
                             {formatDate(row.saleDate)}
                           </div>
-                        </td>
+                        </TableCell>
 
                         {/* Thao tác */}
-                        <td className="px-4 py-4 text-right">
-                          <button
+                        <TableCell className="px-4 py-4 text-right">
+                          <Button
                             type="button"
+                            variant="ghost"
+                            size="icon"
                             onClick={() => setDeleteTarget(row)}
                             disabled={!canDelete}
-                            aria-label={`Xoá sản phẩm ${row.productName || row.serial || "này"
-                              }`}
+                            aria-label={`Xoá sản phẩm ${
+                              row.productName || row.serial || "này"
+                            }`}
                             title={
                               canDelete
                                 ? "Xoá dòng sản phẩm này"
                                 : "Dòng sản phẩm thiếu ID nên không thể xoá an toàn"
                             }
-                            className="grid h-8.5 w-8.5 place-items-center rounded-lg text-slate-400 opacity-60 transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-600 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:cursor-not-allowed disabled:opacity-20"
+                            className="text-muted-foreground opacity-60 transition group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive focus-visible:opacity-100"
                           >
-                            <Trash2 className="h-4.5 w-4.5" />
-                          </button>
-                        </td>
-                      </tr>
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
                     );
                   })
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
 
           {meta && rows.length > 0 && (
-            <div className="flex flex-col gap-3 border-t border-slate-100 px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
-              <p className="text-center text-xs text-slate-500 sm:text-left">
+            <div className="flex flex-col gap-3 border-t border-border px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+              <p className="text-center text-xs text-muted-foreground sm:text-left">
                 Hiển thị{" "}
-                <span className="font-semibold text-slate-700">
+                <span className="font-semibold text-foreground">
                   {rangeStart}–{rangeEnd}
                 </span>{" "}
                 trong{" "}
-                <span className="font-semibold text-slate-700">
+                <span className="font-semibold text-foreground">
                   {meta.filtered.toLocaleString("vi-VN")}
                 </span>{" "}
                 dòng sản phẩm
               </p>
 
-              <div className="flex items-center justify-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setPage(Math.max(1, meta.page - 1))}
-                  disabled={meta.page <= 1 || isLoading}
-                  aria-label="Trang trước"
-                  className={cn(secondaryButton, "h-8.5 px-3")}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  <span>Trước</span>
-                </button>
+              <Pagination
+                aria-label="Phân trang hóa đơn"
+                className="mx-auto w-auto sm:mx-0"
+              >
+                <PaginationContent className="gap-2">
+                  <PaginationItem>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage(Math.max(1, meta.page - 1))}
+                      disabled={meta.page <= 1 || isLoading}
+                      aria-label="Trang trước"
+                      className="h-9 gap-1 px-3 text-xs font-semibold"
+                    >
+                      <ChevronLeft className="size-4" />
+                      <span>Trước</span>
+                    </Button>
+                  </PaginationItem>
 
-                <span className="min-w-[80px] text-center text-xs font-semibold tabular-nums text-slate-600">
-                  Trang {meta.page} / {meta.totalPages}
-                </span>
+                  <PaginationItem>
+                    <span className="min-w-[80px] text-center text-xs font-semibold tabular-nums text-muted-foreground">
+                      Trang {meta.page} / {meta.totalPages}
+                    </span>
+                  </PaginationItem>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    setPage(Math.min(meta.totalPages, meta.page + 1))
-                  }
-                  disabled={meta.page >= meta.totalPages || isLoading}
-                  aria-label="Trang sau"
-                  className={cn(secondaryButton, "h-8.5 px-3")}
-                >
-                  <span>Sau</span>
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
+                  <PaginationItem>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setPage(Math.min(meta.totalPages, meta.page + 1))
+                      }
+                      disabled={meta.page >= meta.totalPages || isLoading}
+                      aria-label="Trang sau"
+                      className="h-9 gap-1 px-3 text-xs font-semibold"
+                    >
+                      <span>Sau</span>
+                      <ChevronRight className="size-4" />
+                    </Button>
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             </div>
           )}
-        </section>
+        </Card>
 
-        <footer className="mt-6 flex flex-col gap-2 text-[10px] text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+        <footer className="mt-6 flex flex-col gap-2 text-[10px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p className="flex items-center gap-1.5">
-            <ShieldCheck className="h-3.5 w-3.5" />
+            <ShieldCheck className="size-3.5" />
             Mỗi dòng là một sản phẩm; nhiều sản phẩm cùng hóa đơn dùng chung mã
             hóa đơn.
           </p>
@@ -838,45 +928,6 @@ export function DashboardClient({ user }: { user: SessionUser }) {
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
       />
-
-      {toast && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="animate-pop-in fixed bottom-4 left-4 right-4 z-[60] flex max-w-sm items-start gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-xl shadow-slate-900/10 sm:left-auto sm:w-[360px]"
-        >
-          <span
-            className={cn(
-              "grid h-9 w-9 shrink-0 place-items-center rounded-xl ring-1",
-              toast.type === "success"
-                ? "bg-emerald-50 text-emerald-600 ring-emerald-100"
-                : "bg-red-50 text-red-600 ring-red-100",
-            )}
-          >
-            {toast.type === "success" ? (
-              <CheckCircle2 className="h-4 w-4" />
-            ) : (
-              <AlertCircle className="h-4 w-4" />
-            )}
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-slate-800">
-              {toast.type === "success" ? "Thành công" : "Có lỗi"}
-            </p>
-            <p className="mt-0.5 text-[11px] leading-5 text-slate-500">
-              {toast.message}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setToast(null)}
-            aria-label="Đóng thông báo"
-            className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-          >
-            <X className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      )}
     </div>
   );
 }
@@ -885,39 +936,39 @@ function SkeletonRows() {
   return (
     <>
       {Array.from({ length: 6 }).map((_, index) => (
-        <tr key={index} className="border-b border-slate-100 last:border-0">
-          <td className="px-4 py-4">
-            <div className="h-3 w-5 animate-pulse rounded bg-slate-100" />
-          </td>
-          <td className="px-4 py-4">
-            <div className="h-3 w-28 animate-pulse rounded bg-slate-100" />
-            <div className="mt-2 h-2.5 w-20 animate-pulse rounded bg-slate-100" />
-          </td>
-          <td className="px-4 py-4">
-            <div className="h-3 w-32 animate-pulse rounded bg-slate-100" />
-            <div className="mt-2 h-2.5 w-20 animate-pulse rounded bg-slate-100" />
-          </td>
-          <td className="px-4 py-4">
-            <div className="h-3 w-28 animate-pulse rounded bg-slate-100" />
-            <div className="mt-2 h-2.5 w-24 animate-pulse rounded bg-slate-100" />
-          </td>
-          <td className="px-4 py-4">
-            <div className="h-3 w-36 animate-pulse rounded bg-slate-100" />
-            <div className="mt-2 h-2.5 w-16 animate-pulse rounded bg-slate-100" />
-          </td>
-          <td className="px-4 py-4">
-            <div className="h-3 w-24 animate-pulse rounded bg-slate-100" />
-          </td>
-          <td className="px-4 py-4">
-            <div className="h-3 w-20 animate-pulse rounded bg-slate-100" />
-          </td>
-          <td className="hidden px-4 py-4 xl:table-cell">
-            <div className="h-3 w-20 animate-pulse rounded bg-slate-100" />
-          </td>
-          <td className="px-4 py-4">
-            <div className="ml-auto h-7 w-7 animate-pulse rounded-lg bg-slate-100" />
-          </td>
-        </tr>
+        <TableRow key={index} className="border-border/70 hover:bg-transparent">
+          <TableCell className="px-4 py-4">
+            <Skeleton className="h-3 w-5" />
+          </TableCell>
+          <TableCell className="px-4 py-4">
+            <Skeleton className="h-3 w-28" />
+            <Skeleton className="mt-2 h-2.5 w-20" />
+          </TableCell>
+          <TableCell className="px-4 py-4">
+            <Skeleton className="h-3 w-32" />
+            <Skeleton className="mt-2 h-2.5 w-20" />
+          </TableCell>
+          <TableCell className="px-4 py-4">
+            <Skeleton className="h-3 w-28" />
+            <Skeleton className="mt-2 h-2.5 w-24" />
+          </TableCell>
+          <TableCell className="px-4 py-4">
+            <Skeleton className="h-3 w-36" />
+            <Skeleton className="mt-2 h-2.5 w-16" />
+          </TableCell>
+          <TableCell className="px-4 py-4">
+            <Skeleton className="h-3 w-24" />
+          </TableCell>
+          <TableCell className="px-4 py-4">
+            <Skeleton className="h-3 w-20" />
+          </TableCell>
+          <TableCell className="hidden px-4 py-4 xl:table-cell">
+            <Skeleton className="h-3 w-20" />
+          </TableCell>
+          <TableCell className="px-4 py-4">
+            <Skeleton className="ml-auto size-7 rounded-lg" />
+          </TableCell>
+        </TableRow>
       ))}
     </>
   );
